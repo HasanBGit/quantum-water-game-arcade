@@ -135,7 +135,7 @@ export function createTankField({ scene, model, reduceMotion }) {
   // ---- the clerk
   const clerk = buildPerson({ skin: SKIN.white, outfit: 0xffd23f, trim: 0xff9f1c, head: "cap", headColor: 0xff5d73, vest: 0xffffff, shoes: 0x2b2b2b });
   clerk.visible = false;
-  clerk.scale.setScalar(1.7); // a bigger clerk, so he reads from the far camera
+  clerk.scale.setScalar(2.4); // a bigger clerk, so he reads from the far camera
   root.add(clerk);
   let walk = null; // { path: [{x,z,tank}], i, speed, onStep, n, pause }
   let walkPhase = 0;

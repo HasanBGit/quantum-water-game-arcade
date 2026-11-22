@@ -94,6 +94,7 @@ export const STRINGS = {
           start: "Press Start",
         },
         coach: {
+          toggle: "Helper tips",
           goal: "Goal: exactly 3 slots, lowest bill.",
           best: "Your best legal bill so far: {b}",
           noBest: "No legal bill yet",

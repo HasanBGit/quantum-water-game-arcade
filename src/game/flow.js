@@ -117,18 +117,31 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
     startSimulation(getSlots());
   });
   const coachStep = h("p", { class: "stepof" });
-  section(
+  // The goal line shows the quest log's current task, so the two never disagree (main.js calls setGoal).
+  const coachGoal = h("p", { class: "goal" }, C.goal);
+  // On a phone the card starts folded to just the cat; tapping the cat opens or closes it.
+  const phoneMq = window.matchMedia("(max-width: 700px)");
+  const coachToggle = h("button", { type: "button", class: "coachtoggle", "aria-label": C.toggle || "Helper tips" }, mascot("mascot coachmascot"));
+  const coachCard = section(
     "play",
-    "coach",
-    mascot("mascot coachmascot"),
+    "coach collapsed",
+    coachToggle,
     coachStep,
     h("ol", { class: "pills", "aria-label": "Steps" }, pills),
-    h("p", { class: "goal" }, C.goal),
+    coachGoal,
     coachMsg,
     coachTip,
     coachBest,
     h("div", { class: "row" }, simBtn, simWhy),
   );
+  const syncCoachToggle = () => coachToggle.setAttribute("aria-expanded", String(!phoneMq.matches || !coachCard.classList.contains("collapsed")));
+  coachToggle.addEventListener("click", () => {
+    if (!phoneMq.matches) return;
+    coachCard.classList.toggle("collapsed");
+    syncCoachToggle();
+  });
+  phoneMq.addEventListener("change", syncCoachToggle);
+  syncCoachToggle();
 
   function updateCoach(slots) {
     const b = billLines(model, slots);
@@ -553,6 +566,9 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
 
   return {
     start: (skip) => go(skip ? "play" : "title"),
+    setGoal: (line) => {
+      coachGoal.textContent = line;
+    },
     onSlots: (slots) => {
       if (phase === "play") updateCoach(slots);
     },

@@ -481,7 +481,7 @@ async function start() {
   const stageEl = document.querySelector(".stage");
   const plansAll = allPlans(model);
   const progress = { predictions: [] };
-  quest = createQuest({ stage: stageEl, text: t.quest, model, onComplete: (msg) => ($("status").textContent = msg) });
+  quest = createQuest({ stage: stageEl, text: t.quest, model, onComplete: (msg) => ($("status").textContent = msg), onChange: (line) => flow && flow.setGoal(line) });
   dialogue = createDialogue({
     stage: stageEl,
     text: t.dialogue,
@@ -672,6 +672,7 @@ async function start() {
       }
     },
   });
+  flow.setGoal(quest.nextLine());
   flow.start(new URLSearchParams(location.search).has("skip"));
 
   const clock = new THREE.Clock();

@@ -6,7 +6,7 @@ import { createQuestState } from "./questState.js";
 
 const fill = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => (k in v ? v[k] : `{${k}}`));
 
-export function createQuest({ stage, text, model = PRESETS.team, onComplete = () => {} }) {
+export function createQuest({ stage, text, model = PRESETS.team, onComplete = () => {}, onChange = () => {} }) {
   const state = createQuestState(model);
   const greedy = state.greedyTotal;
   const root = document.createElement("details");
@@ -28,12 +28,17 @@ export function createQuest({ stage, text, model = PRESETS.team, onComplete = ()
   const main = tasks.filter((x) => !x.optional);
   let announced = false;
 
+  const nextLine = () => {
+    const current = main.find((x) => !x.done);
+    return current ? fill(text.next, { task: current.label }) : text.complete;
+  };
+
   function render() {
     const done = main.filter((t) => t.done).length;
     const current = main.find((x) => !x.done);
     const line = document.createElement("span");
     line.className = "next";
-    line.textContent = current ? fill(text.next, { task: current.label }) : text.complete;
+    line.textContent = nextLine();
     const count = document.createElement("small");
     count.textContent = fill(text.summary, { done, total: main.length });
     summary.replaceChildren(line, count);
@@ -52,6 +57,7 @@ export function createQuest({ stage, text, model = PRESETS.team, onComplete = ()
       }),
     );
     root.classList.toggle("complete", done === main.length);
+    onChange(nextLine());
     if (done === main.length && !announced) {
       announced = true;
       onComplete(text.complete);
@@ -69,6 +75,8 @@ export function createQuest({ stage, text, model = PRESETS.team, onComplete = ()
       root.hidden = phase !== "play" && phase !== "around";
       if (state.phase(phase)) render();
     },
+    /** The line for the current task, e.g. "Next: Press Simulate and watch the search". */
+    nextLine,
     /** The id of the first task not done yet, or null when all are. */
     next: () => state.next(),
     /** The slots (1 to 5) the obvious plan switches on. */
