@@ -413,6 +413,8 @@ export function buildPerson(spec) {
     }
   };
   root.userData.walk(0, 0);
+  // Already merged per material above, so perf.js cheapPeople() must not flatten it into one plain material.
+  root.userData.cheap = true;
   return root;
 }
 
