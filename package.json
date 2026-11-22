@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "node --test test/math.test.js test/bill.test.js test/quality.test.js test/search.test.js test/site.test.js test/scripts.test.js test/room.test.js test/i18n.test.js",
+    "test": "node --test test/math.test.js test/bill.test.js test/quality.test.js test/quest.test.js test/search.test.js test/site.test.js test/scripts.test.js test/room.test.js test/i18n.test.js",
     "table": "node scripts/print-table.mjs",
     "verify": "node scripts/verify-game.mjs",
     "assets-doc": "node scripts/write-assets-md.mjs",

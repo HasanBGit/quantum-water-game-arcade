@@ -323,7 +323,7 @@ async function main() {
       if (st.slots.join("") === "11001") shown = st;
     }
     record("talk-effect", "A reply changes the plant: Noura switches on the 3 cheapest slots and the bill shows 19", shown && shown.bill.total === 19 && shown.predictions.includes("yes") ? "PASS" : "FAIL", shown ? `slots ${shown.slots.join("")}, bill ${shown.bill.total}, guess recorded: ${shown.predictions.join(",")}` : `slots never changed (reached node ${JSON.stringify((await state()).dialogue)})`);
-    record("talk-quest", `Talking marks the quest: Noura done, 'try the obvious plan' done, and 'beat the 3 cheapest' only if a cheaper plan was already made (${cheaperPlanMadeEarlier ? "one was, earlier in this run" : "none was"})`, shown && shown.quest.done.includes("noura") && shown.quest.done.includes("greedy") && shown.quest.done.includes("beat") === cheaperPlanMadeEarlier ? "PASS" : "FAIL", shown ? JSON.stringify(shown.quest.done) : "no state");
+    record("talk-quest", `Talking marks the quest: Noura done, 'try the obvious plan' done, and 'find a cheaper plan' not yet, because it only counts after the obvious plan (${cheaperPlanMadeEarlier ? "a cheaper plan was made earlier in this run, before the obvious one, so it must not count" : "none was made"})`, shown && shown.quest.done.includes("noura") && shown.quest.done.includes("greedy") && !shown.quest.done.includes("beat") ? "PASS" : "FAIL", shown ? JSON.stringify(shown.quest.done) : "no state");
     await tap("Escape");
     const closed = await waitFor(async () => (await state()).dialogue.open === false && (await state()), 20000);
     const talkingFlag = await b.evaluate("document.body.dataset.talking === undefined");

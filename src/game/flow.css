@@ -125,18 +125,6 @@ button.quiet:active:not(:disabled) { transform: none; }
   box-shadow: var(--lift);
   font-size: 0.9375rem;
 }
-.coach::before { /* speech-bubble tail */
-  content: "";
-  position: absolute;
-  left: 62px;
-  top: 30px;
-  width: 16px;
-  height: 16px;
-  background: #fff;
-  border-left: var(--outline);
-  border-bottom: var(--outline);
-  transform: rotate(45deg);
-}
 .coachmascot { position: absolute; left: -6px; top: 4px; width: 60px; height: 70px; animation: hop 2.2s ease-in-out infinite; transform-origin: 50% 100%; }
 .coach p { margin: 6px 0 0; }
 .coach .goal { font-weight: 700; }
@@ -411,7 +399,9 @@ body[data-phase="around"] :is(.bill, .pad, #btn-use, #btn-overview) { display: n
 .pills.simsteps[hidden] { display: none; }
 .why-line { margin: 4px 0 0; font-size: 0.9375rem; color: #4a4f86; }
 @media (max-width: 700px) {
-  .why-line { font-size: 0.8125rem; }
+  .why-line { font-size: 0.75rem; margin-top: 2px; }
+  .simtop h2 { display: none; }
+  .simtop .caption { font-size: 0.875rem; min-height: 0; }
   .simsteps li { font-size: 0.625rem; padding: 1px 2px; }
 }
 

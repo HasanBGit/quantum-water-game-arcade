@@ -75,6 +75,39 @@ langSelect.addEventListener("change", () => {
 });
 $("settings-panel").append(langSelect);
 
+// The two selects stay in the page (checks and the quality code drive them) but are hidden. Each gets a
+// row of option buttons instead, so every choice is one click and nothing opens as a grey system popup.
+function optionRow(select, label) {
+  const wrap = document.createElement("div");
+  wrap.className = "opt-group";
+  wrap.setAttribute("role", "radiogroup");
+  wrap.setAttribute("aria-label", label);
+  const title = document.createElement("div");
+  title.className = "opt-title";
+  title.textContent = label;
+  wrap.append(title);
+  const buttons = [...select.options].map((o) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "opt";
+    b.setAttribute("role", "radio");
+    b.textContent = o.textContent;
+    b.addEventListener("click", () => {
+      if (select.value === o.value) return;
+      select.value = o.value;
+      select.dispatchEvent(new Event("change"));
+    });
+    wrap.append(b);
+    return [o.value, b];
+  });
+  const sync = () => buttons.forEach(([v, b]) => b.setAttribute("aria-checked", String(v === select.value)));
+  select.addEventListener("change", sync);
+  sync();
+  select.after(wrap);
+}
+optionRow($("quality"), t.quality.label);
+optionRow(langSelect, t.language);
+
 // Settings: one button opens a panel with the view, sound, quality and language controls.
 const uiSound = createUiSound();
 const settingsBtn = $("btn-settings");

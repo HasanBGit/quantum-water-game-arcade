@@ -80,9 +80,9 @@ export function sandMaterial(repeatX, repeatY) {
 export function tintSea(mesh, centreZ) {
   const geo = mesh.geometry;
   const pos = geo.attributes.position;
-  const shallow = new THREE.Color("#6af0e0");
-  const mid = new THREE.Color("#17c8ea");
-  const deep = new THREE.Color("#1470e0");
+  const shallow = new THREE.Color("#5eead8");
+  const mid = new THREE.Color("#18b4e6");
+  const deep = new THREE.Color("#0b50c0");
   const col = new Float32Array(pos.count * 3);
   const tmp = new THREE.Color();
   for (let i = 0; i < pos.count; i++) {
@@ -150,13 +150,13 @@ function palmGeometry(lean, height) {
     const a = P(i / segs);
     const b = P((i + 1) / segs);
     const len = a.distanceTo(b);
-    const r0 = 0.34 - 0.14 * (i / segs);
-    const r1 = 0.34 - 0.14 * ((i + 1) / segs);
+    const r0 = 0.26 - 0.1 * (i / segs);
+    const r1 = 0.26 - 0.1 * ((i + 1) / segs);
     const mid = a.clone().add(b).multiplyScalar(0.5);
     parts.push(piece(new THREE.CylinderGeometry(r1, r0, len * 1.03, 7), i % 2 ? "#a8703c" : "#c48a52", { pos: [mid.x, mid.y, mid.z], rot: [0, 0, -Math.atan2(b.x - a.x, b.y - a.y)] }));
   }
   const top = P(1);
-  parts.push(piece(new THREE.SphereGeometry(0.42, 6, 4), "#8a5a2b", { pos: [top.x, top.y, top.z] }));
+  parts.push(piece(new THREE.SphereGeometry(0.34, 6, 4), "#8a5a2b", { pos: [top.x, top.y, top.z] }));
   for (let i = 0; i < 3; i++) {
     const a = (i / 3) * PI * 2;
     parts.push(piece(new THREE.SphereGeometry(0.2, 5, 4), "#6d4220", { pos: [top.x + Math.cos(a) * 0.35, top.y - 0.3, top.z + Math.sin(a) * 0.35] }));
@@ -170,7 +170,7 @@ function palmGeometry(lean, height) {
 }
 
 function palms(scene) {
-  const variants = [palmGeometry(1.4, 5.6), palmGeometry(-1.1, 6.6), palmGeometry(0.5, 4.8)];
+  const variants = [palmGeometry(0.8, 5.6), palmGeometry(-0.6, 6.4), palmGeometry(0.3, 4.8)];
   const mat = toon({ side: THREE.DoubleSide });
   // [variant, x, z, scale]. Back row behind the fence, then the corners and sides.
   const spots = [
@@ -223,7 +223,7 @@ function dunes(scene) {
 }
 
 function rocks(scene) {
-  const colours = ["#b9c3d9", "#a3aec8", "#d0d8e8", "#9fb2c9", "#d9bc90"].map((c) => new THREE.Color(c));
+  const colours = ["#cfcdd2", "#b9b7c0", "#e2dfe2", "#aeb3bd", "#d9bc90"].map((c) => new THREE.Color(c));
   const spots = [];
   for (let i = 0; i < 24; i++) {
     const x = -70 + i * 6 + range(-2, 2);
@@ -246,7 +246,7 @@ function rocks(scene) {
 
 function hills(scene) {
   const list = [[-260, -260, 70, 60], [-190, -290, 55, 48], [-120, -300, 60, 70], [-40, -310, 50, 40], [40, -320, 70, 55], [120, -300, 60, 64], [200, -280, 70, 52], [270, -250, 60, 58], [-300, -180, 50, 44], [310, -170, 52, 46]];
-  const parts = list.map(([x, z, r, h], i) => piece(new THREE.ConeGeometry(r, h, 5), i % 2 ? "#9dbdf0" : "#8fb3e8", { pos: [x, h / 2 - 2, z], rot: [0, range(0, PI), 0] }));
+  const parts = list.map(([x, z, r, h], i) => piece(new THREE.ConeGeometry(r * 1.3, h * 0.5, 5), i % 2 ? "#b4dbf6" : "#a6d0f2", { pos: [x, h * 0.25 - 2, z], rot: [0, range(0, PI), 0] }));
   const mesh = mergeMesh(parts, toon({ roughness: 1 }));
   mesh.name = "far_hills";
   mesh.receiveShadow = false;

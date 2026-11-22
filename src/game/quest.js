@@ -1,16 +1,14 @@
 // The quest log: a short list that checks itself off as the player talks, plays and finishes.
 // It watches; it never changes the game. Every check uses numbers from src/math.
 import "./dialogue.css";
-import { PRESETS, allPlans, greedyPlan } from "../math/index.js";
-import { billLines } from "./bill.js";
+import { PRESETS } from "../math/index.js";
+import { createQuestState } from "./questState.js";
 
 const fill = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => (k in v ? v[k] : `{${k}}`));
-const HELPERS = ["noura", "layla", "faisal", "omar", "james"];
 
 export function createQuest({ stage, text, model = PRESETS.team, onComplete = () => {} }) {
-  const greedyP = greedyPlan(model, allPlans(model));
-  const greedy = greedyP.total;
-  const greedyX = greedyP.x;
+  const state = createQuestState(model);
+  const greedy = state.greedyTotal;
   const root = document.createElement("details");
   root.id = "quest";
   root.className = "quest";
@@ -19,20 +17,14 @@ export function createQuest({ stage, text, model = PRESETS.team, onComplete = ()
   root.append(summary, list);
   stage.append(root);
 
-  // The path: try the obvious plan (the 3 cheapest slots, which is the wrong one), see why it costs more, find a
-  // cheaper plan, then simulate and read the result. The other helpers are optional extras and are not counted.
-  const task = (id, label, optional = false) => ({ id, label, optional, done: false });
-  const tasks = [
-    task("greedy", text.tasks.greedy),
-    task("layla", text.tasks.layla),
-    task("beat", fill(text.tasks.beat, { greedy })),
-    task("simulate", text.tasks.simulate),
-    task("result", text.tasks.result),
-    task("noura", text.tasks.noura, true),
-    task("faisal", text.tasks.faisal, true),
-    task("omar", text.tasks.omar, true),
-    task("james", text.tasks.james, true),
-  ];
+  const label = (id) => (id === "beat" ? fill(text.tasks.beat, { greedy }) : text.tasks[id]);
+  const tasks = [...state.main.map((id) => ({ id, optional: false })), ...state.optional.map((id) => ({ id, optional: true }))].map((t) => ({
+    ...t,
+    label: label(t.id),
+    get done() {
+      return state.isDone(t.id);
+    },
+  }));
   const main = tasks.filter((x) => !x.optional);
   let announced = false;
 
@@ -65,38 +57,24 @@ export function createQuest({ stage, text, model = PRESETS.team, onComplete = ()
       onComplete(text.complete);
     }
   }
-  const mark = (id) => {
-    const t = tasks.find((x) => x.id === id);
-    if (t && !t.done) {
-      t.done = true;
-      render();
-    }
-  };
   render();
 
   return {
     /** A helper's conversation reached a topic (not just the greeting). */
-    talked: (helperId) => HELPERS.includes(helperId) && mark(helperId),
+    talked: (helperId) => state.talked(helperId) && render(),
     /** The player's slots changed. */
-    slots(slots) {
-      const b = billLines(model, slots);
-      if (b.chosen === b.required) {
-        if (slots.every((v, i) => Boolean(v) === Boolean(greedyX[i]))) mark("greedy");
-        if (b.total < greedy) mark("beat");
-      }
-    },
+    slots: (slots) => state.slots(slots) && render(),
     /** The game moved to another screen. */
     phase(phase) {
       root.hidden = phase !== "play" && phase !== "around";
-      if (phase === "simulate") mark("simulate");
-      if (phase === "result") mark("result");
+      if (state.phase(phase)) render();
     },
     /** The id of the first task not done yet, or null when all are. */
-    next: () => (main.find((x) => !x.done) || {}).id || null,
+    next: () => state.next(),
     /** The slots (1 to 5) the obvious plan switches on. */
-    greedySlots: () => greedyX.map((v, i) => (v ? i + 1 : 0)).filter(Boolean),
-    done: () => tasks.filter((t) => t.done).map((t) => t.id),
+    greedySlots: () => state.greedySlots(),
+    done: () => state.doneIds(),
     total: main.length,
-    debug: () => ({ done: tasks.filter((t) => t.done).map((t) => t.id), total: tasks.length, hidden: root.hidden }),
+    debug: () => ({ done: state.doneIds(), total: main.length, hidden: root.hidden }),
   };
 }

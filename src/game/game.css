@@ -384,26 +384,38 @@ body[data-mode="overview"] #btn-pov, body[data-phase]:not([data-phase="play"]) #
 
 /* ---- Settings: one button; the view, sound, quality and language controls open in a panel under it */
 .controls { flex-direction: column; align-items: flex-end; gap: 0; padding: 6px; }
+/* The panel is a drawer docked to the right edge, under the Settings button. */
 #settings-panel {
-  position: absolute;
-  top: calc(100% + 8px);
+  position: fixed;
+  top: 76px;
   right: 0;
+  max-height: calc(100vh - 92px);
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 15rem;
-  padding: 10px;
+  width: min(17rem, calc(100vw - 24px));
+  padding: 12px;
   background: var(--panel);
   border: var(--outline);
-  border-radius: 18px;
+  border-right: 0;
+  border-radius: 20px 0 0 20px;
   box-shadow: var(--lift);
+  animation: settings-in 0.18s ease-out;
 }
+@keyframes settings-in { from { transform: translateX(24px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { #settings-panel { animation: none; } }
+#settings-panel :is(#quality, #lang) { display: none !important; } /* replaced by the option buttons */
+.opt-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.opt-title { flex: 0 0 100%; font-weight: 800; font-size: 0.8rem; opacity: 0.7; }
+#settings-panel .opt { width: auto; flex: 1 1 auto; padding: 8px 10px; text-align: center; }
+#settings-panel .opt[aria-checked="true"] { background: #ffd23f; box-shadow: 0 0 0 3px #fff, 0 0 0 5px #8a5cff; }
 #settings-panel[hidden] { display: none; }
 #settings-panel :is(button, select) { width: 100%; text-align: start; }
 #settings-panel #lang, #settings-panel #quality { max-width: none; }
 @media (max-width: 700px) {
   .controls { left: var(--gutter); right: auto; top: 68px; align-items: flex-start; flex-wrap: nowrap; }
-  #settings-panel { right: auto; left: 0; }
+  #settings-panel { top: 120px; }
   #quality { display: block; } /* phones keep the quality choice now that it lives in a panel */
 }
 @media (max-width: 700px) and (max-height: 640px) { .controls { top: 56px; } }
