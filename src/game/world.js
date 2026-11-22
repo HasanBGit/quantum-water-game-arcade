@@ -2,8 +2,7 @@
 //   intake (west, with the jetty) -> pump hall (five bays) -> membrane racks (behind the bays)
 //   -> tank yard (east) -> control room (south-east, the place to talk to people).
 import * as THREE from "three";
-import { Tree } from "@dgreenheck/ez-tree";
-import { pbr } from "./textures.js";
+import { buildScenery, sandMaterial, tintSea } from "./scenery.js";
 import { SLOT_COLORS } from "./palette.js";
 import { buildPumpSkid, buildMembraneRack, buildTank, buildTerminal, buildSea, mergeStatic } from "./builders.js";
 import { buildPipes, buildLampPost, buildWaterTower, buildSign, buildControlRoom, CONTROL_ROOM, buildFence, buildJetty, buildBollards, buildMarkings } from "./site.js";
@@ -160,7 +159,7 @@ export async function buildWorld(scene, assets, text) {
     add(kerb);
   });
 
-  const sand = new THREE.Mesh(new THREE.PlaneGeometry(500, 140), pbr("aerial_beach_01", [70, 18], { color: 0xffefa6 }));
+  const sand = new THREE.Mesh(new THREE.PlaneGeometry(500, 140), sandMaterial(70, 20));
   sand.rotation.x = -Math.PI / 2;
   sand.position.set(0, -0.12, 45);
   sand.receiveShadow = true;
@@ -172,12 +171,13 @@ export async function buildWorld(scene, assets, text) {
   const sp = shoreGeo.attributes.position;
   for (let i = 0; i < sp.count; i++) sp.setY(i, -0.12 - (-11 - sp.getZ(i)) * 0.055);
   shoreGeo.computeVertexNormals();
-  const shore = new THREE.Mesh(shoreGeo, pbr("aerial_beach_01", [70, 5], { color: 0xffefa6 }));
+  const shore = new THREE.Mesh(shoreGeo, sandMaterial(70, 6));
   shore.receiveShadow = true;
   add(shore);
 
   const sea = buildSea();
   sea.object.position.set(0, -0.55, -60);
+  tintSea(sea.object, -60); // turquoise at the shore, deep blue far out (the arcade look, not a photo sea)
   add(sea.object);
 
   // ---- Pump hall: pads, skids, control posts, bollards
@@ -325,29 +325,8 @@ export async function buildWorld(scene, assets, text) {
   stat(mergeStatic(props)).name = "props";
   add(mergeStatic(staticRoot, ["screen", "lamp"]));
 
-  // ---- Trees and shrubs on the sand behind the fence (EZ-Tree, MIT)
-  const trees = [];
-  const shrubs = [];
-  const plant = (preset, seed, x, z, height, list) => {
-    const tree = new Tree();
-    tree.loadPreset(preset);
-    tree.options.seed = seed;
-    tree.generate();
-    const b = new THREE.Box3().setFromObject(tree);
-    tree.scale.setScalar(height / Math.max(b.getSize(new THREE.Vector3()).y, 0.01));
-    tree.position.set(x, -0.12, z);
-    tree.traverse((o) => {
-      if (o.isMesh) {
-        o.castShadow = true;
-        o.receiveShadow = true;
-      }
-    });
-    tree.name = list === trees ? "tree" : "shrub";
-    scene.add(tree);
-    list.push(tree);
-  };
-  [[-22, 101, -14.5, 7], [-8, 102, -15.5, 6.5], [5, 103, -14, 7.5], [19, 104, -15, 6.8]].forEach(([x, seed, z, h]) => plant("Oak Medium", seed, x, z, h, trees));
-  [[-15, 201, -12.9, 1.5], [-1, 202, -13, 1.4], [12, 203, -12.9, 1.6]].forEach(([x, seed, z, h]) => plant("Bush 1", seed, x, z, h, shrubs));
+  // ---- Everything outside the fence: palms, dunes, rocks, foam, boats, gulls, far hills (see scenery.js)
+  const scenery = buildScenery(scene);
 
   return {
     colliders,
@@ -360,10 +339,11 @@ export async function buildWorld(scene, assets, text) {
     setControlRoomOpen: (open) => {
       cutaway.visible = !open;
     },
-    trees,
-    shrubs,
+    trees: scenery.trees,
+    shrubs: scenery.shrubs,
     update(t) {
       sea.update(t);
+      scenery.update(t);
     },
     setSeaEvery: sea.setEvery,
   };

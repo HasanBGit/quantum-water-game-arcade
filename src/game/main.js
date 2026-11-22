@@ -19,6 +19,7 @@ import { createTerminals } from "./terminals.js";
 import { createPumps } from "./pumps.js";
 import { createSiteTags } from "./siteTags.js";
 import { createArcade3d } from "./arcade3d.js";
+import { createTrail } from "./trail.js";
 import { billLines, newStarts } from "./bill.js";
 import { createFlow } from "./flow.js";
 import { createTankField } from "./tankField.js";
@@ -92,11 +93,14 @@ window.addEventListener("keydown", (e) => {
 document.addEventListener("pointerdown", (e) => {
   if (!$("settings-panel").hidden && !e.target.closest(".controls")) setSettings(false);
 });
-$("btn-click").textContent = t.clickSounds;
-$("btn-click").setAttribute("aria-pressed", String(uiSound.enabled));
+const showClick = () => {
+  $("btn-click").textContent = uiSound.enabled ? t.clickSounds : t.clickSoundsOff;
+  $("btn-click").setAttribute("aria-pressed", String(uiSound.enabled));
+};
+showClick();
 $("btn-click").addEventListener("click", () => {
   uiSound.set(!uiSound.enabled);
-  $("btn-click").setAttribute("aria-pressed", String(uiSound.enabled));
+  showClick();
 });
 // A soft pop on every button, tab or summary press (keyboard presses too). Disabled buttons stay quiet.
 document.addEventListener(
@@ -353,10 +357,35 @@ async function start() {
     talkBtn.textContent = label;
   }
 
+  // What the tracker wants next: a spot to walk to (the trail leads there) and where the arrow floats.
+  function questTarget() {
+    if (!quest || phase !== "play" || mode !== "operator" || (dialogue && dialogue.isOpen)) return null;
+    const next = quest.next();
+    const helper = npcs.npcs.find((n) => n.p.id === next);
+    if (helper) return { arrow: { x: helper.group.position.x, y: 2.5, z: helper.group.position.z }, go: { x: helper.group.position.x, z: helper.group.position.z }, stop: 2.2 };
+    if (next === "greedy" || next === "beat") {
+      let list = world.terminals;
+      if (next === "greedy") {
+        const need = quest.greedySlots().filter((n) => !slots[n - 1]);
+        if (need.length) list = world.terminals.filter((x) => need.includes(x.slot));
+      } else {
+        const off = world.terminals.filter((x) => !slots[x.slot - 1]);
+        if (off.length) list = off;
+      }
+      const post = nearestTerminal(operator.position, list, Infinity);
+      if (post) return { arrow: post, go: standPoint(post), stop: 0.3 };
+    }
+    return null;
+  }
+  const trail = createTrail({ scene, blocked: (x, z) => blocked(x, z) });
+  let frameDt = 0.016;
   let useLabel = "";
   function updateUseButton() {
     const near = mode === "operator" && !(dialogue && dialogue.isOpen) ? nearestTerminal(operator.position, world.terminals) : null;
-    arcade.pointAt(near);
+    // The bouncing arrow follows the tracker: over the helper to talk to next, or over a control post to press.
+    const target = questTarget();
+    arcade.pointAt(target ? target.arrow : near);
+    trail.update(frameDt, waterTime, operator.position, target ? target.go : null, target ? target.stop : 0);
     const label = near ? fill(slots[near.slot - 1] ? t.use.off : t.use.on, { n: near.slot }) : "";
     if (label === useLabel) return;
     useLabel = label;
@@ -616,6 +645,7 @@ async function start() {
   let waterTime = 0;
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.05);
+    frameDt = dt;
     frames++;
     const nowMs = performance.now();
     const realMs = nowMs - lastFrame;

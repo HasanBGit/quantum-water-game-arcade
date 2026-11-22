@@ -130,3 +130,12 @@ body[data-mode="overview"] #btn-talk { display: none; }
   #dialogue { max-height: 62vh; }
 }
 @media (prefers-reduced-motion: reduce) { #dialogue.more .dlg-line::after { animation: none; } }
+
+/* ---- the quest chip is the tracker: it always says what to do next; the full list opens under it */
+.quest summary { display: block; }
+.quest summary .next { display: block; font-weight: 700; line-height: 1.25; }
+.quest summary small { display: block; margin-top: 2px; font-size: 0.8125rem; font-weight: 600; color: #4b4b86; }
+.quest li.current { font-weight: 700; color: var(--navy); }
+.quest li.current::before { background: var(--price); }
+.quest li.optional { font-weight: 500; color: #5a5f93; }
+.quest li em { margin-left: 4px; padding: 0 6px; border-radius: 999px; background: #e8ecff; font-size: 0.75rem; font-style: normal; font-weight: 700; }

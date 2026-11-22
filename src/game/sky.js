@@ -83,7 +83,7 @@ export function createSky(renderer, scene, sunDir, { reduceMotion = false } = {}
   const textures = [cloudTexture(11), cloudTexture(23), cloudTexture(37)];
   for (let i = 0; i < 14; i++) {
     const a = (i / 14) * Math.PI * 2 + (i % 3) * 0.2;
-    const elev = 0.16 + ((i * 7) % 5) * 0.075;
+    const elev = 0.07 + ((i * 7) % 5) * 0.07; // low enough to sit above the horizon in the play view
     const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: textures[i % 3], depthWrite: false, fog: false, transparent: true, opacity: 0.96 }));
     const rr = RADIUS * 0.85;
     sprite.position.set(Math.cos(a) * rr * Math.cos(elev), Math.sin(elev) * rr, Math.sin(a) * rr * Math.cos(elev));

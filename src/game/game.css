@@ -407,3 +407,6 @@ body[data-mode="overview"] #btn-pov, body[data-phase]:not([data-phase="play"]) #
   #quality { display: block; } /* phones keep the quality choice now that it lives in a panel */
 }
 @media (max-width: 700px) and (max-height: 640px) { .controls { top: 56px; } }
+
+/* The open Settings panel sits above the bill, which hung over its first button. Still under conversations (20). */
+.controls { z-index: 8; }

@@ -87,7 +87,7 @@ export function createArcade3d(scene, terminals, bays, model) {
         r.ring.visible = r.disc.visible = r.level > 0.01;
       });
       arrow.visible = Boolean(enabled && target);
-      if (arrow.visible) arrow.position.set(target.x, 1.55 + Math.sin(time * 6) * 0.14, target.z);
+      if (arrow.visible) arrow.position.set(target.x, (target.y ?? 1.55) + Math.sin(time * 6) * 0.14, target.z);
     },
   };
 }

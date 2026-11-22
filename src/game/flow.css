@@ -421,3 +421,9 @@ body[data-phase="around"] :is(.bill, .pad, #btn-use, #btn-overview) { display: n
   html .simview { top: var(--sim-view-top, 148px); }
   .chips { top: var(--sim-chips-top, 238px); bottom: auto; }
 }
+
+/* ---- the tracker: the three steps are shown in the coach card (Choose, Improve, Simulate), the current one lit,
+   finished ones ticked. The line under it says what to do right now. "Step n of 3" would say the same, so it goes. */
+.coach .pills { display: flex; margin: 0 0 4px; }
+.coach .stepof { display: none; }
+.coach #coach-msg { font-weight: 700; font-size: 1rem; }
