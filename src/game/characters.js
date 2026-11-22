@@ -112,39 +112,87 @@ const _e = new THREE.Euler();
 const _p = new THREE.Vector3();
 const _s = new THREE.Vector3();
 
-// A group whose shapes are baked into one mesh per material when done() is called.
+// Three shared materials for every person (skin, cloth, gloss); each shape is tinted with vertex colours, so
+// 7 people cost a handful of draw calls. Colour * shade is baked per vertex (shade = baked ambient occlusion).
+let SHARED = null;
+function shared() {
+  if (SHARED) return SHARED;
+  const [skinMapT, skinBumpT] = skinTextures();
+  SHARED = {
+    skin: new THREE.MeshPhysicalMaterial({
+      color: 0xffffff, map: skinMapT, roughness: 0.55, bumpMap: skinBumpT, bumpScale: 0.6, vertexColors: true,
+      sheen: 0.6, sheenRoughness: 0.4, sheenColor: new THREE.Color(0xd9876e), // soft warm rim, a cheap stand-in for light passing through skin
+      emissive: new THREE.Color(0xc06040), emissiveIntensity: 0.03,
+    }),
+    cloth: new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.88, bumpMap: weave(), bumpScale: 1.4, side: THREE.DoubleSide, vertexColors: true, sheen: 0.5, sheenRoughness: 0.55, sheenColor: new THREE.Color(0x909090) }),
+    gloss: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35, vertexColors: true }),
+    check: new Map(),
+  };
+  return SHARED;
+}
+function checkMaterial(map) {
+  const c = shared().check;
+  if (!c.has(map)) c.set(map, new THREE.MeshPhysicalMaterial({ color: 0xffffff, map, roughness: 0.85, bumpMap: weave(), bumpScale: 1.0, side: THREE.DoubleSide, vertexColors: true, sheen: 0.5, sheenColor: new THREE.Color(0x909090) }));
+  return c.get(map);
+}
+
+// The rig being built: bones plus every shape, each bound to one bone. finishRig() turns them into skinned meshes.
+let RIG = null;
+
+// A bone (so it can be rotated) that collects shapes; they are baked into the skinned meshes later.
 function makePart(parent, x = 0, y = 0, z = 0) {
-  const group = new THREE.Group();
+  const group = new THREE.Bone();
   group.position.set(x, y, z);
   parent.add(group);
-  const byMat = new Map();
+  RIG.bones.push(group);
   return {
     group,
-    // shade(x, y, z) -> 0..1 darkens a vertex (baked ambient occlusion: under the chin, near the hem)
-    add(geo, material, p = [0, 0, 0], r = [0, 0, 0], sc = [1, 1, 1], shade = null) {
+    // paint = { mat, tint }. shade(x, y, z) -> 0..1 darkens a vertex (under the chin, near the hem)
+    add(geo, paint, p = [0, 0, 0], r = [0, 0, 0], sc = [1, 1, 1], shade = null) {
       _m.compose(_p.set(p[0], p[1], p[2]), _q.setFromEuler(_e.set(r[0], r[1], r[2])), _s.set(sc[0], sc[1], sc[2]));
       geo.applyMatrix4(_m);
       const pos = geo.attributes.position;
       const col = new Float32Array(pos.count * 3);
       for (let i = 0; i < pos.count; i++) {
         const f = shade ? shade(pos.getX(i), pos.getY(i), pos.getZ(i)) : 1;
-        col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = f;
+        col[i * 3] = paint.tint.r * f;
+        col[i * 3 + 1] = paint.tint.g * f;
+        col[i * 3 + 2] = paint.tint.b * f;
       }
       geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
-      if (!byMat.has(material)) byMat.set(material, []);
-      byMat.get(material).push(geo);
+      RIG.items.push({ geo, bone: group, mat: paint.mat });
     },
-    done() {
-      for (const [material, geos] of byMat) {
-        const merged = geos.length > 1 ? mergeGeometries(geos, false) : geos[0];
-        const mesh = new THREE.Mesh(merged ?? geos[0], material);
-        mesh.castShadow = true;
-        group.add(mesh);
-      }
-      byMat.clear();
-      return group;
-    },
+    done: () => group,
   };
+}
+
+function finishRig(root, rootBone) {
+  root.updateMatrixWorld(true);
+  const skeleton = new THREE.Skeleton(RIG.bones);
+  const byMat = new Map();
+  for (const { geo, bone, mat } of RIG.items) {
+    geo.applyMatrix4(bone.matrixWorld); // into the rest pose, in the person's space
+    const n = geo.attributes.position.count;
+    const idx = RIG.bones.indexOf(bone);
+    const si = new Uint16Array(n * 4);
+    const sw = new Float32Array(n * 4);
+    for (let i = 0; i < n; i++) {
+      si[i * 4] = idx;
+      sw[i * 4] = 1;
+    }
+    geo.setAttribute("skinIndex", new THREE.BufferAttribute(si, 4));
+    geo.setAttribute("skinWeight", new THREE.BufferAttribute(sw, 4));
+    if (!byMat.has(mat)) byMat.set(mat, []);
+    byMat.get(mat).push(geo);
+  }
+  for (const [mat, geos] of byMat) {
+    const mesh = new THREE.SkinnedMesh(mergeGeometries(geos, false), mat);
+    mesh.frustumCulled = false; // the bones move it, so the rest-pose bounds are not reliable
+    root.add(mesh);
+    mesh.updateMatrixWorld(true);
+    mesh.bind(skeleton);
+    geos.forEach((g) => g.dispose());
+  }
 }
 
 const sphere = (w = 16, h = 12) => new THREE.SphereGeometry(1, w, h);
@@ -174,21 +222,15 @@ function shell(thetaLen, gap = 0, segs = 28) {
 export function buildPerson(spec) {
   const s = { height: 1, beard: null, vest: null, hardHat: false, glasses: false, shoes: 0x2b2b2b, pants: null, ...spec };
   const root = new THREE.Group();
-  const body = new THREE.Group();
+  RIG = { bones: [], items: [] };
+  const body = new THREE.Bone(); // root of the skeleton: it bounces while walking
   root.add(body);
+  RIG.bones.push(body);
 
-  const std = (color, roughness) => new THREE.MeshStandardMaterial({ color, roughness, vertexColors: true });
-  const cloth = (color, extra = {}) => {
-    const c = new THREE.Color(color);
-    return new THREE.MeshPhysicalMaterial({ color, roughness: 0.88, bumpMap: weave(), bumpScale: 1.4, side: THREE.DoubleSide, vertexColors: true, sheen: 0.7, sheenRoughness: 0.55, sheenColor: c.clone().lerp(new THREE.Color(0xffffff), 0.5), ...extra });
-  };
-  const [skinMapT, skinBumpT] = skinTextures();
-  const skinC = new THREE.Color(s.skin);
-  const skin = new THREE.MeshPhysicalMaterial({
-    color: s.skin, map: skinMapT, roughness: 0.55, bumpMap: skinBumpT, bumpScale: 0.6, vertexColors: true,
-    sheen: 0.6, sheenRoughness: 0.4, sheenColor: skinC.clone().lerp(new THREE.Color(0xff8a70), 0.5), // soft warm rim, a cheap stand-in for light passing through skin
-    emissive: skinC.clone().multiply(new THREE.Color(0xff5a3a)), emissiveIntensity: 0.06,
-  });
+  const SH_ = shared();
+  const std = (color, roughness) => ({ mat: roughness <= 0.5 ? SH_.gloss : SH_.cloth, tint: new THREE.Color(color) });
+  const cloth = (color, extra = {}) => ({ mat: extra.map ? checkMaterial(extra.map) : extra.roughness <= 0.5 ? SH_.gloss : SH_.cloth, tint: new THREE.Color(color) });
+  const skin = { mat: SH_.skin, tint: new THREE.Color(s.skin) };
   const outfit = cloth(s.outfit);
   const trim = cloth(s.trim ?? s.outfit);
   const legMat = s.pants ? cloth(s.pants) : outfit;
@@ -361,16 +403,26 @@ export function buildPerson(spec) {
   H.done();
   const head = H.group;
 
-  // Eyelids: skin-coloured shells over the eyes that close for a blink.
-  const lids = [-1, 1].map((side) => {
-    const lid = new THREE.Mesh(sphere(12, 8), skin);
-    lid.position.set(side * 0.037, 0.02, faceZ(side * 0.037, 0.02) + 0.0005);
-    lid.scale.set(0.0195, 0.0001, 0.011);
-    head.add(lid);
-    return lid;
+  // Eyelids: one small skin-coloured mesh (both lids) over the eyes that closes for a blink.
+  const lidGeos = [-1, 1].map((side) => {
+    const g = sphere(12, 8);
+    g.scale(0.0195, 1, 0.011);
+    g.translate(side * 0.037, 0, 0);
+    return g;
   });
+  const lidGeo = mergeGeometries(lidGeos, false);
+  const lidCol = new Float32Array(lidGeo.attributes.position.count * 3);
+  for (let i = 0; i < lidCol.length; i += 3) lidCol.set([skin.tint.r, skin.tint.g, skin.tint.b], i);
+  lidGeo.setAttribute("color", new THREE.BufferAttribute(lidCol, 3));
+  const lidMesh = new THREE.Mesh(lidGeo, SH_.skin);
+  lidMesh.position.set(0, 0.02, faceZ(0.037, 0.02) + 0.0005);
+  lidMesh.scale.set(1, 0.0001, 1);
+  head.add(lidMesh);
+  const lids = [lidMesh];
 
   body.scale.setScalar(s.height);
+  finishRig(root, body);
+  RIG = null;
 
   // ---- animation hooks ------------------------------------------------------------------------
   const seed = Math.random() * 20;
@@ -413,7 +465,7 @@ export function buildPerson(spec) {
     }
   };
   root.userData.walk(0, 0);
-  // Already merged per material above, so perf.js cheapPeople() must not flatten it into one plain material.
+  // Already one skinned mesh per material, so perf.js cheapPeople() must not flatten it into one plain material.
   root.userData.cheap = true;
   return root;
 }
