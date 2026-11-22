@@ -175,7 +175,7 @@ function palms(scene) {
   // [variant, x, z, scale]. Back row behind the fence, then the corners and sides.
   const spots = [
     [0, -22, -14.5, 1.1], [1, -8, -15.5, 1.0], [2, 5, -14, 1.2], [0, 19, -15, 1.0], [1, -14, -17, 0.9], [2, 12, -16.5, 1.1], [0, 27, -14.5, 1.0],
-    [1, -33, -10, 1.15], [0, 34, -9, 1.2], [2, -36, 14, 1.1], [1, 37, 15, 1.2], [0, -48, 30, 1.3], [2, 50, 30, 1.2], [1, 2, 26, 1.0], [0, -13, 22, 0.9],
+    [1, -33, -10, 1.15], [0, 34, -9, 1.2], [2, -36, 14, 1.1], [1, 37, 15, 1.2], [0, -48, 30, 1.3], [2, 50, 30, 1.2], [1, 30, 26, 1.0], [0, -28, 24, 0.9],
   ];
   return variants.map((geo, vi) => {
     const mine = spots.filter((s) => s[0] === vi);
@@ -211,7 +211,7 @@ function bushes(scene) {
 function dunes(scene) {
   const colours = ["#f4d089", "#efc577", "#fadf9f"];
   const list = [
-    [-40, 22, 14, 1.6, 9], [-22, 31, 16, 2.2, 10], [0, 38, 22, 2.6, 12], [24, 29, 15, 1.9, 9], [44, 22, 13, 1.7, 8], [62, 36, 18, 2.8, 12],
+    [-40, 22, 14, 1.6, 9], [-30, 56, 16, 2.2, 10], [0, 62, 22, 2.6, 12], [44, 50, 15, 1.9, 9], [44, 22, 13, 1.7, 8], [62, 36, 18, 2.8, 12],
     [-58, 34, 18, 2.6, 11], [-72, 12, 14, 2.0, 9], [72, 10, 14, 1.8, 9], [-62, -6, 12, 1.6, 8], [64, -4, 12, 1.7, 8], [-90, 30, 20, 3.2, 12], [92, 28, 20, 3.0, 12],
   ];
   const parts = list.map(([x, z, sx, sy, sz], i) =>
@@ -230,7 +230,12 @@ function rocks(scene) {
     if (x > -29 && x < -17) continue; // keep the jetty clear
     spots.push([x, range(-21.5, -17.5), range(0.6, 1.5)]);
   }
-  for (let i = 0; i < 9; i++) spots.push([range(-60, 60), range(16, 34), range(0.5, 1.1)]);
+  // The search yard (tankField.js) stands on the sand at x -22..26, z 12..40: keep it clear.
+  for (let i = 0; i < 9; i++) {
+    const spot = [range(-60, 60), range(16, 34), range(0.5, 1.1)];
+    if (spot[0] > -24 && spot[0] < 28) continue;
+    spots.push(spot);
+  }
   const mesh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0), new THREE.MeshStandardMaterial({ flatShading: true, roughness: 0.9 }), spots.length);
   const m = new THREE.Matrix4();
   spots.forEach(([x, z, s], i) => {
