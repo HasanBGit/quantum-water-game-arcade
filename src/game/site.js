@@ -155,35 +155,114 @@ export function buildSign(text, width = 2.2) {
   return mergeStatic(g);
 }
 
-/** Control room: a small block building with a door, windows and a canopy. 9 x 5.5 m. Front faces +Z. */
-export function buildControlRoom(label) {
-  const g = new THREE.Group();
-  g.name = "control_room";
+/** Control room dimensions (metres) and the parts the game needs to know about: walls to collide with, the door. Front faces +Z. */
+export const CONTROL_ROOM = (() => {
   const W = 9;
   const D = 5.5;
   const H = 3.2;
+  const T = 0.25; // wall thickness
+  const doorX = -2.5;
+  const doorW = 1.4;
+  const fz = D / 2 - T / 2;
+  const left = doorX - doorW / 2; // front wall pieces either side of the door
+  const right = doorX + doorW / 2;
+  // [centre x, centre z, half width, half depth] in the room's own space
+  const walls = [
+    [0, -fz, W / 2, T / 2], // back
+    [-(W / 2 - T / 2), 0, T / 2, D / 2], // left
+    [W / 2 - T / 2, 0, T / 2, D / 2], // right
+    [(-W / 2 + left) / 2, fz, (left + W / 2) / 2, T / 2], // front, left of the door
+    [(right + W / 2) / 2, fz, (W / 2 - right) / 2, T / 2], // front, right of the door
+  ];
+  return { W, D, H, T, doorX, doorW, fz, left, right, walls };
+})();
+
+/**
+ * Control room you can walk into: four walls, a door, a floor, a desk with screens. Returns the shell (merged with the
+ * rest of the site) and, in `userData.cutaway`, the roof, canopy and front wall. The game hides the cutaway while the
+ * player is inside, so the camera (south of the room) can see in.
+ */
+export function buildControlRoom(label) {
+  const { W, D, H, T, doorX, left, right, fz } = CONTROL_ROOM;
+  const B = 0.05; // floor level
+  const top = B + H;
   const walls = pbr("concrete_wall_004", [4, 1.3]);
   const plinth = pbr("painted_plaster_wall", [4, 1]);
   const roofMat = painted(0x59646b, 0.6);
   const dark = painted(0x232a2e, 0.6);
+  const floorMat = painted(0x8a8f93, 0.7);
+  const wood = painted(0x7a5a3a, 0.6);
   const glass = new THREE.MeshStandardMaterial({ color: 0x3a5a6a, metalness: 0.9, roughness: 0.05, emissive: 0x7a6a48, emissiveIntensity: 0.08 });
+  const screenOn = new THREE.MeshBasicMaterial({ color: 0x5fe0c8 });
+  const screenDim = new THREE.MeshBasicMaterial({ color: 0x2e7f78 });
 
-  put(g, box(W + 0.4, 0.15, D + 0.4, plinth), 0, 0.075, 0);
-  put(g, box(W, H, D, walls), 0, 0.15 + H / 2, 0);
-  put(g, box(W + 0.5, 0.22, D + 0.5, roofMat), 0, 0.15 + H + 0.11, 0);
-  put(g, box(1.6, 0.55, 1.3, painted(0xb7bec2, 0.5)), 2.6, 0.15 + H + 0.22 + 0.28, -0.8);
-  const zf = D / 2 + 0.01;
-  put(g, box(1.1, 2.1, 0.08, dark), -2.5, 0.15 + 1.05, zf);
-  put(g, box(1.9, 0.09, 1.0, dark), -2.5, 0.15 + 2.35, zf + 0.5);
-  for (const x of [-3.3, -1.7]) put(g, cyl(0.04, 2.35, dark, 8), x, 0.15 + 1.17, zf + 0.95);
+  const g = new THREE.Group();
+  g.name = "control_room";
+  put(g, box(W + 0.4, B, D + 0.4, plinth), 0, B / 2, 0);
+  put(g, box(W - 2 * T, 0.02, D - 2 * T, floorMat), 0, B + 0.01, 0);
+  for (const [x, z, hw, hd] of CONTROL_ROOM.walls.slice(0, 3)) put(g, box(hw * 2, H, hd * 2, walls), x, B + H / 2, z);
+  put(g, box(0.14, 2.1, 0.14, dark), doorX - CONTROL_ROOM.doorW / 2 + 0.07, B + 1.05, fz); // door frame
+  put(g, box(0.14, 2.1, 0.14, dark), doorX + CONTROL_ROOM.doorW / 2 - 0.07, B + 1.05, fz);
+
+  // Inside: a long desk under the back wall with three screens, a chair, a cabinet, a big wall screen.
+  const bz = -D / 2 + T;
+  put(g, box(5.2, 0.08, 0.8, wood), 1.3, B + 0.86, bz + 0.45);
+  put(g, box(5.0, 0.8, 0.7, dark), 1.3, B + 0.42, bz + 0.45);
+  for (const x of [-0.2, 1.3, 2.8]) {
+    put(g, box(1.1, 0.7, 0.06, dark), x, B + 1.3, bz + 0.3);
+    put(g, box(1.0, 0.6, 0.02, x === 1.3 ? screenOn : screenDim), x, B + 1.3, bz + 0.34);
+  }
+  put(g, box(0.5, 0.06, 0.5, dark), 1.3, B + 0.5, bz + 1.35); // chair seat
+  put(g, box(0.5, 0.55, 0.06, dark), 1.3, B + 0.8, bz + 1.6);
+  put(g, cyl(0.05, 0.5, dark, 8), 1.3, B + 0.25, bz + 1.35);
+  put(g, box(0.5, 1.6, 1.6, painted(0xb7bec2, 0.5)), -W / 2 + T + 0.3, B + 0.8, -0.2); // cabinet on the left wall
+  put(g, box(2.6, 1.2, 0.04, dark), -1.2, B + 2.0, -D / 2 + T + 0.03); // wall screen, a plain trace (no numbers)
+  const trace = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.0), new THREE.MeshBasicMaterial({ map: traceTexture() }));
+  trace.position.set(-1.2, B + 2.0, -D / 2 + T + 0.06);
+  g.add(trace);
+
+  // Roof, canopy, front wall: hidden when the player is inside.
+  const c = new THREE.Group();
+  c.name = "control_room_cutaway";
+  put(c, box(W + 0.5, 0.22, D + 0.5, roofMat), 0, top + 0.11, 0);
+  put(c, box(1.6, 0.55, 1.3, painted(0xb7bec2, 0.5)), 2.6, top + 0.22 + 0.28, -0.8);
+  put(c, box(left + W / 2, H, T, walls), (-W / 2 + left) / 2, B + H / 2, fz);
+  put(c, box(W / 2 - right, H, T, walls), (right + W / 2) / 2, B + H / 2, fz);
+  put(c, box(right - left, H - 2.1, T, walls), doorX, B + 2.1 + (H - 2.1) / 2, fz);
+  put(c, box(1.9, 0.09, 1.0, dark), doorX, B + 2.35, fz + 0.5);
+  for (const x of [doorX - 0.8, doorX + 0.8]) put(c, cyl(0.04, 2.35, dark, 8), x, B + 1.17, fz + 0.95);
+  const zf = fz + T / 2 + 0.01;
   for (const x of [0.4, 2.3, 4.0]) {
-    put(g, box(1.55, 1.25, 0.05, dark), x, 0.15 + 1.75, zf);
-    put(g, box(1.4, 1.1, 0.06, glass), x, 0.15 + 1.75, zf + 0.02);
+    put(c, box(1.55, 1.25, 0.05, dark), x, B + 1.75, zf);
+    put(c, box(1.4, 1.1, 0.06, glass), x, B + 1.75, zf + 0.02);
   }
   const face = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.5), new THREE.MeshBasicMaterial({ map: signTexture(label) }));
-  face.position.set(-2.5, 0.15 + 2.75, zf + 0.02);
-  g.add(face);
+  face.position.set(doorX, B + 2.75, zf + 0.02);
+  c.add(face);
+  g.userData.cutaway = mergeStatic(c);
   return mergeStatic(g);
+}
+
+/** A glowing line on a dark panel, for the control room's wall screen. It is a picture, not data. */
+function traceTexture() {
+  const cv = document.createElement("canvas");
+  cv.width = 256;
+  cv.height = 106;
+  const x = cv.getContext("2d");
+  x.fillStyle = "#0e1a1f";
+  x.fillRect(0, 0, 256, 106);
+  x.strokeStyle = "#5fe0c8";
+  x.lineWidth = 3;
+  x.beginPath();
+  for (let i = 0; i <= 256; i += 4) {
+    const y = 53 + Math.sin(i / 20) * 22 + Math.sin(i / 7) * 6;
+    if (i === 0) x.moveTo(i, y);
+    else x.lineTo(i, y);
+  }
+  x.stroke();
+  const t = new THREE.CanvasTexture(cv);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
 }
 
 function chainTexture() {

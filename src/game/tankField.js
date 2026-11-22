@@ -135,6 +135,7 @@ export function createTankField({ scene, model, reduceMotion }) {
   // ---- the clerk
   const clerk = buildPerson({ skin: SKIN.white, outfit: 0xffd23f, trim: 0xff9f1c, head: "cap", headColor: 0xff5d73, vest: 0xffffff, shoes: 0x2b2b2b });
   clerk.visible = false;
+  clerk.scale.setScalar(1.7); // a bigger clerk, so he reads from the far camera
   root.add(clerk);
   let walk = null; // { path: [{x,z,tank}], i, speed, onStep, n, pause }
   let walkPhase = 0;
@@ -165,7 +166,7 @@ export function createTankField({ scene, model, reduceMotion }) {
     const W = cols * GAP_X + 4;
     const D = rows() * GAP_Z + 3;
     const dist = Math.max(30, (W / 2) / (half * aspect) * 1.08, D * 1.6);
-    return { x: CX, y: 6 + dist * 0.5, z: CZ + dist * 0.85, lx: CX, ly: 1.2, lz: CZ + 1 };
+    return { x: CX, y: 6 + dist * 0.72, z: CZ + dist * 0.62, lx: CX, ly: 1.0, lz: CZ + 1.5 };
   }
 
   // ---- the walk: serpentine through the rows, in the aisle in front of each tank
@@ -240,7 +241,7 @@ export function createTankField({ scene, model, reduceMotion }) {
         beacon.visible = true;
       } else beacon.visible = false;
     },
-    /** The classical clerk checks every plan, one by one. onStep(n) after each check. */
+    /** The classical clerk checks every plan, one by one. onStep(n, planIndex) after each check. */
     startClerk({ bar, fast = false, onStep }) {
       resetStates();
       const path = buildPath();
@@ -249,7 +250,7 @@ export function createTankField({ scene, model, reduceMotion }) {
         for (const wp of path) {
           if (wp.tank < 0) continue;
           setLabel(wp.tank, plans[wp.tank].total < bar ? "hit" : "seen");
-          onStep(++n);
+          onStep(++n, wp.tank);
         }
         clerk.visible = false;
         walk = null;
@@ -302,7 +303,7 @@ export function createTankField({ scene, model, reduceMotion }) {
             if (wp.tank >= 0) {
               clerk.rotation.y = Math.PI; // face the tank (it is on the -z side)
               setLabel(wp.tank, plans[wp.tank].total < walk.bar ? "hit" : "seen");
-              walk.onStep(++walk.n);
+              walk.onStep(++walk.n, wp.tank);
               walk.pause = walk.speed > 10 ? 0.02 : 0.18;
             } else walk.i++;
           } else {

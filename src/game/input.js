@@ -23,6 +23,7 @@ export function createInput(onAction) {
       e.preventDefault();
       onAction("use");
     } else if (e.code === "KeyO" && !e.repeat) onAction("overview");
+    else if (e.code === "KeyV" && !e.repeat) onAction("pov");
     else if (e.code === "KeyM" && !e.repeat) onAction("sound");
   });
   window.addEventListener("keyup", (e) => {

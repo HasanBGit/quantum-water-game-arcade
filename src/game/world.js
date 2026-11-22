@@ -6,7 +6,7 @@ import { Tree } from "@dgreenheck/ez-tree";
 import { pbr } from "./textures.js";
 import { SLOT_COLORS } from "./palette.js";
 import { buildPumpSkid, buildMembraneRack, buildTank, buildTerminal, buildSea, mergeStatic } from "./builders.js";
-import { buildPipes, buildLampPost, buildWaterTower, buildSign, buildControlRoom, buildFence, buildJetty, buildBollards, buildMarkings } from "./site.js";
+import { buildPipes, buildLampPost, buildWaterTower, buildSign, buildControlRoom, CONTROL_ROOM, buildFence, buildJetty, buildBollards, buildMarkings } from "./site.js";
 
 export const BAY_X = [-12, -6, 0, 6, 12];
 export const BOUNDS = { minX: -25.5, maxX: 27.5, minZ: -9.5, maxZ: 10.3 };
@@ -249,9 +249,15 @@ export async function buildWorld(scene, assets, text) {
 
   // ---- Control room, signs, lamps, jetty, fence, floor markings
   const room = buildControlRoom(text.signs.control_room);
-  room.position.set(20, 0, 5.5);
+  const ROOM = { x: 20, z: 5.5 };
+  const cutaway = room.userData.cutaway; // roof and front wall; hidden while the operator is inside
+  room.position.set(ROOM.x, 0, ROOM.z);
+  cutaway.position.set(ROOM.x, 0, ROOM.z);
   stat(room);
-  solid({ x: 20, z: 5.5, hw: 4.7, hd: 2.95 });
+  add(cutaway);
+  for (const [x, z, hw, hd] of CONTROL_ROOM.walls) solid({ x: ROOM.x + x, z: ROOM.z + z, hw, hd });
+  // True while (x, z) is under the control room's roof, door plane included.
+  const inControlRoom = (x, z) => Math.abs(x - ROOM.x) < CONTROL_ROOM.W / 2 - CONTROL_ROOM.T && z - ROOM.z < CONTROL_ROOM.fz + 0.1 && z - ROOM.z > -CONTROL_ROOM.D / 2;
 
   const signSpots = [
     ["intake", -20.5, 2.6],
@@ -350,6 +356,10 @@ export async function buildWorld(scene, assets, text) {
     pumpModel: skid,
     pumpBays: BAY_X.map((x) => ({ x, y: PAD_TOP, z: -0.5 })),
     zones: ZONES,
+    inControlRoom,
+    setControlRoomOpen: (open) => {
+      cutaway.visible = !open;
+    },
     trees,
     shrubs,
     update(t) {

@@ -370,3 +370,54 @@ body[data-phase="around"] :is(.bill, .pad, #btn-use, #btn-overview) { display: n
   /* the number chips used to sit behind the control panel; they go under the view tabs instead */
   .chips { top: 238px; bottom: auto; }
 }
+
+/* ---- desktop title card: it filled a small window. Tighter type and spacing, and the step badges no longer sit on the "About 4 minutes" line. */
+@media (min-width: 701px) {
+  .intro { padding: 16px 22px 18px; }
+  .intro .hero { gap: 10px; margin-bottom: 2px; }
+  .intro .mascot.big { width: 56px; height: 66px; }
+  .intro .hero h2 { font-size: clamp(1.8rem, 5vw, 2.4rem); }
+  .intro .lead { font-size: 0.9375rem; }
+  .intro h3 { margin: 10px 0 18px; font-size: 0.9375rem; }
+  .intro .how { gap: 10px; }
+  .intro .lvl { padding: 30px 10px 8px; font-size: 0.8125rem; }
+  .intro .lvl strong { font-size: 0.9375rem; }
+  .intro .how p, .intro .lvl p { font-size: 0.8125rem; margin-top: 4px; }
+  .intro .lvl .badge { width: 30px; height: 30px; top: -12px; font-size: 0.95rem; }
+  .intro .note { font-size: 0.8125rem; margin-top: 8px; }
+  .intro .primary { margin-top: 12px; min-height: 50px; padding: 0 34px; font-size: 1.15rem; }
+}
+
+/* short, wide windows (a phone on its side, a small browser window): keep the three steps side by side so the card fits */
+@media (max-width: 700px) and (min-width: 520px) and (max-height: 620px) {
+  .intro .how { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .intro .lvl { padding: 28px 8px 8px; font-size: 0.75rem; }
+  .intro .how p, .intro .lvl p { font-size: 0.75rem; }
+  .intro .hero h2 { font-size: 1.7rem; }
+  .intro .mascot.big { width: 48px; height: 56px; }
+  .intro .primary { min-height: 46px; margin-top: 10px; }
+}
+
+/* phone title card: centred in the window instead of stuck to the top, and the step badges clear the "About 4 minutes" line */
+@media (max-width: 700px) {
+  .card.intro { inset-block-start: 50%; translate: 0 -50%; }
+  .intro h3 { margin: 12px 0 20px; }
+  .intro .hero h2 { font-size: 2rem; }
+}
+
+/* ---- simulate: step list and the "why" line */
+.parttag { margin: 2px 0 4px; font-size: 0.8125rem; font-weight: 700; color: #4a4f86; }
+.pills.simsteps { display: flex; margin: 0 0 4px; }
+.pills.simsteps[hidden] { display: none; }
+.why-line { margin: 4px 0 0; font-size: 0.9375rem; color: #4a4f86; }
+@media (max-width: 700px) {
+  .why-line { font-size: 0.8125rem; }
+  .simsteps li { font-size: 0.625rem; padding: 1px 2px; }
+}
+
+/* phone Simulate: tabs and chips follow the caption box (see simLayout.js); the caption box itself never takes more than 40% of the height */
+@media (max-width: 700px) {
+  .simtop { max-height: 40vh; overflow-y: auto; }
+  html .simview { top: var(--sim-view-top, 148px); }
+  .chips { top: var(--sim-chips-top, 238px); bottom: auto; }
+}

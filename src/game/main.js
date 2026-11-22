@@ -4,10 +4,12 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { pickLang, gameStrings, LANGUAGES } from "../i18n.js";
 import "./i18n.css";
+import "./simLayout.js";
 import { PRESETS } from "../math/index.js";
 import { createAssets } from "./assets.js";
 import { createInput } from "./input.js";
 import { createAmbience } from "./audio.js";
+import { createUiSound } from "./uisound.js";
 import { buildPlayer } from "./characters.js";
 import { createNpcs } from "./npcs.js";
 import { createSky } from "./sky.js";
@@ -49,6 +51,7 @@ const coarse = matchMedia("(pointer: coarse)").matches || Math.min(window.innerW
 const hintText = coarse ? t.hintTouch : t.hint;
 $("hint").textContent = hintText;
 $("btn-overview").textContent = t.overview;
+$("btn-pov").textContent = t.pov;
 $("btn-sound").textContent = t.soundOff;
 $("error-link").textContent = t.errorLink;
 $("loading-text").textContent = t.loading;
@@ -69,7 +72,41 @@ langSelect.addEventListener("change", () => {
   url.searchParams.set("lang", langSelect.value);
   location.href = url.toString();
 });
-document.querySelector(".controls").append(langSelect);
+$("settings-panel").append(langSelect);
+
+// Settings: one button opens a panel with the view, sound, quality and language controls.
+const uiSound = createUiSound();
+const settingsBtn = $("btn-settings");
+function setSettings(open) {
+  $("settings-panel").hidden = !open;
+  settingsBtn.setAttribute("aria-expanded", String(open));
+}
+settingsBtn.textContent = `\u2699 ${t.settings}`;
+settingsBtn.addEventListener("click", () => setSettings($("settings-panel").hidden));
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !$("settings-panel").hidden) {
+    setSettings(false);
+    settingsBtn.focus();
+  }
+});
+document.addEventListener("pointerdown", (e) => {
+  if (!$("settings-panel").hidden && !e.target.closest(".controls")) setSettings(false);
+});
+$("btn-click").textContent = t.clickSounds;
+$("btn-click").setAttribute("aria-pressed", String(uiSound.enabled));
+$("btn-click").addEventListener("click", () => {
+  uiSound.set(!uiSound.enabled);
+  $("btn-click").setAttribute("aria-pressed", String(uiSound.enabled));
+});
+// A soft pop on every button, tab or summary press (keyboard presses too). Disabled buttons stay quiet.
+document.addEventListener(
+  "click",
+  (e) => {
+    const el = e.target.closest && e.target.closest("button, summary, select");
+    if (el && !el.disabled && el.id !== "btn-click") uiSound.click();
+  },
+  true,
+);
 
 function fail(message) {
   $("loading").hidden = true;
@@ -225,8 +262,10 @@ async function start() {
     if (phase !== "play" && phase !== "around") return;
     if (action === "overview" && phase === "play") toggleOverview();
     if (action === "sound") toggleSound();
+    if (action === "pov" && phase === "play" && mode === "operator") togglePov();
     if (action === "use" && mode === "operator" && phase === "play") {
-      if (!useNearest()) talkNearest();
+      if (useNearest()) uiSound.click();
+      else talkNearest();
     }
   }
 
@@ -246,6 +285,28 @@ async function start() {
     $("status").textContent = overview ? t.statusOverview : t.statusOperator;
     document.body.dataset.mode = mode;
   }
+
+  // First person: the camera sits at the operator's eyes. Left and right turn, up and down walk, drag to look.
+  let pov = false;
+  let povOn = false; // pov and nothing else (overview, a conversation, another screen) taking the camera
+  let yaw = 0;
+  let pitch = 0;
+  const FOV = camera.fov;
+  function togglePov() {
+    pov = !pov;
+    yaw = operator.rotation.y;
+    pitch = 0;
+    goal = null;
+    $("btn-pov").setAttribute("aria-pressed", String(pov));
+    $("btn-pov").textContent = pov ? t.povOff : t.pov;
+    $("hint").textContent = pov ? t.hintPov : hintText;
+  }
+  $("btn-pov").addEventListener("click", togglePov);
+  canvas.addEventListener("pointermove", (e) => {
+    if (!povOn || !(e.buttons & 1)) return;
+    yaw -= e.movementX * 0.005;
+    pitch = Math.max(-1, Math.min(1, pitch - e.movementY * 0.004));
+  });
 
   async function toggleSound() {
     const turnOn = !ambience.state.on;
@@ -315,6 +376,7 @@ async function start() {
     const moved = Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y);
     downAt = null;
     if (moved > 8 || mode !== "operator" || phase !== "play" || (dialogue && dialogue.isOpen)) return;
+    uiSound.click();
     const rect = canvas.getBoundingClientRect();
     ndc.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
     raycaster.setFromCamera(ndc, camera);
@@ -375,6 +437,8 @@ async function start() {
     onOpen: (person) => {
       goal = null;
       operator.rotation.y = Math.atan2(person.position.x - operator.position.x, person.position.z - operator.position.z);
+      yaw = operator.rotation.y;
+      pitch = 0;
     },
   });
 
@@ -385,8 +449,12 @@ async function start() {
   }
 
   function walk(dt) {
-    const a = input.axis();
+    let a = input.axis();
     const p = operator.position;
+    if (povOn) {
+      yaw -= a.x * 2.2 * dt;
+      a = { x: Math.sin(yaw) * -a.z, z: Math.cos(yaw) * -a.z };
+    }
     let dx = 0;
     let dz = 0;
     if (a.x || a.z) {
@@ -419,7 +487,7 @@ async function start() {
         goal.stuck = moved < Math.hypot(dx, dz) * 0.2 ? goal.stuck + dt : 0;
         if (goal.stuck > 0.6) goal = null;
       }
-      let diff = Math.atan2(dx, dz) - operator.rotation.y;
+      let diff = povOn ? yaw - operator.rotation.y : Math.atan2(dx, dz) - operator.rotation.y;
       diff = Math.atan2(Math.sin(diff), Math.cos(diff));
       operator.rotation.y += diff * Math.min(1, dt * 12);
       moving = true;
@@ -455,6 +523,15 @@ async function start() {
     look.set(s.x, 1.25, s.z);
     lookNow.lerp(look, k);
     camera.lookAt(lookNow);
+  }
+
+  function povCamera() {
+    const p = operator.position;
+    camera.position.set(p.x, 1.6, p.z);
+    look.set(p.x + Math.sin(yaw) * Math.cos(pitch), 1.6 + Math.sin(pitch), p.z + Math.cos(yaw) * Math.cos(pitch));
+    lookNow.copy(look);
+    camera.lookAt(look);
+    operator.rotation.y = yaw;
   }
 
   function followCamera(dt) {
@@ -550,8 +627,18 @@ async function start() {
     world.update(waterTime);
     sky.update(dt, camera);
     if ((phase === "play" || phase === "around") && !dialogue.isOpen) walk(dt);
+    const wantPov = pov && mode === "operator" && phase === "play" && !dialogue.isOpen;
+    if (wantPov !== povOn) {
+      povOn = wantPov;
+      operator.visible = !povOn;
+      camera.fov = povOn ? 70 : FOV;
+      camera.updateProjectionMatrix();
+    }
+    // roof and front wall off while inside (kept on in first person, where you look up at a ceiling)
+    world.setControlRoomOpen(!povOn && world.inControlRoom(operator.position.x, operator.position.z));
     pumps.update(dt, waterTime);
     npcs.update(dt, operator.position, phase === "play" && mode === "operator", slots, dialogue.isOpen);
+    for (const n of npcs.npcs) n.group.visible = phase === "play" || phase === "around"; // keep the Simulate and Result screens uncluttered
     arcade.update(dt, waterTime, phase === "play" && mode === "operator");
     field.update(dt, waterTime);
     simView.update(dt, waterTime);
@@ -567,7 +654,7 @@ async function start() {
       }
     } else if (phase === "simulate") simCamera(Math.min(realMs / 1000, 0.25));
     else if (phase === "title") orbitCamera(dt);
-    else if (mode === "operator") followCamera(dt);
+    else if (mode === "operator") (povOn ? povCamera : followCamera)(dt);
     else controls.update();
     siteTags.update();
     renderer.render(scene, camera);

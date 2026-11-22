@@ -162,7 +162,8 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
   // The tanks are in the 3D plant (tankField.js). This is only the heads-up display on top of them.
   const chip = (label) => {
     const dd = h("dd");
-    return { dd, el: h("div", { class: "kv" }, h("dt", {}, label), dd) };
+    const dt = h("dt", {}, label);
+    return { dd, dt, el: h("div", { class: "kv" }, dt, dd) };
   };
   const cBar = chip(S.bar);
   const cCheaper = chip(S.cheaper);
@@ -170,6 +171,11 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
   const cChance = chip(S.chance);
   const cClerk = chip(S.clerkTitle);
   const falls = h("p", { class: "falls" });
+  const partTag = h("p", { class: "parttag" });
+  const why = h("p", { class: "why-line" });
+  const stepItems = S.steps.map((name, i) => h("li", {}, h("span", { class: "n" }, String(i + 1)), ` ${name}`));
+  const stepList = h("ol", { class: "pills simsteps", "aria-label": S.stepsLabel }, stepItems);
+  const backBtn2 = h("button", { type: "button", class: "quiet" }, S.back);
   const caption = h("p", { class: "caption", role: "status", "aria-live": "polite" });
   const nextBtn = h("button", { type: "button", class: "primary" });
   const autoBtn = h("button", { type: "button", "aria-pressed": "false" }, S.auto);
@@ -178,9 +184,9 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
   section(
     "simulate",
     "simhud",
-    h("div", { class: "simtop" }, h("h2", { id: "sim-title", tabindex: "-1" }, S.title), caption, falls),
+    h("div", { class: "simtop" }, h("h2", { id: "sim-title", tabindex: "-1" }, S.title), partTag, stepList, caption, why, falls),
     h("dl", { class: "chips" }, cBar.el, cCheaper.el, cStep.el, cChance.el, cClerk.el),
-    h("div", { class: "row simrow" }, nextBtn, autoBtn, skipBtn),
+    h("div", { class: "row simrow" }, backBtn2, nextBtn, autoBtn, skipBtn),
   );
 
   // simulation state
@@ -191,6 +197,10 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
   let found = null;
   let auto = false;
   let roundNo = 0;
+  let stage = "classical"; // classical (Part 1) | quantum (Part 2)
+  let clerkDone = false;
+  let clerkBest = null;
+  const history = []; // snapshots so Back can undo a step
 
   // Levels go to the tanks, which ease towards them on their own.
   function show(amps, { marked = false, measuredK = null, meanAt = null } = {}) {
@@ -202,16 +212,44 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
   }
 
   function startClerk() {
+    clerkDone = false;
+    clerkBest = null;
     cClerk.dd.textContent = fill(S.clerkChip, { n: 0 });
-    field.startClerk({ bar, fast: roundNo > 0, onStep: (n) => (cClerk.dd.textContent = fill(S.clerkChip, { n })) });
+    field.startClerk({
+      bar,
+      onStep: (n, k) => {
+        cClerk.dd.textContent = fill(S.clerkChip, { n });
+        if (clerkBest === null || plans[k].total < clerkBest) clerkBest = plans[k].total;
+        if (n >= PLAN_COUNT) clerkDone = true;
+        if (stage === "classical") refresh();
+      },
+    });
   }
+
+  // Part 1: the classical clerk on its own, flat tanks.
+  function beginClassical() {
+    stage = "classical";
+    bar = plans[yourPlan].total;
+    round = null;
+    show(Array(PLAN_COUNT).fill(1 / Math.sqrt(PLAN_COUNT)), { marked: false });
+    startClerk();
+    refresh();
+  }
+
+  // Which of the five listed steps is the current one (Part 2 only).
+  const stepIndex = () => {
+    if (sub === "done" || sub === "measured-found" || sub === "measured-unlucky") return 4;
+    if (sub === "oracled") return 1;
+    if (round && !round.empty && s === round.steps && s > 0) return 3;
+    return s === 0 ? 0 : 2;
+  };
 
   function beginRound(newBar) {
     bar = newBar;
     round = planRound(plans, bar);
     s = 0;
     found = null;
-    startClerk();
+    stage = "quantum";
     roundNo++;
     if (round.empty) {
       sub = "done";
@@ -224,6 +262,24 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
   }
 
   function refresh() {
+    backBtn2.disabled = history.length === 0;
+    if (stage === "classical") {
+      partTag.textContent = S.partA;
+      stepList.hidden = true;
+      cStep.dt.textContent = S.bestSoFar;
+      cStep.dd.textContent = clerkBest === null ? "-" : String(clerkBest);
+      cBar.dd.textContent = String(bar);
+      cCheaper.dd.textContent = String(plans.filter((p) => p.total < bar).length);
+      cChance.dd.textContent = "-";
+      falls.textContent = "";
+      caption.textContent = clerkDone ? fill(S.classical.done, { b: clerkBest }) : fill(S.classical.start, { bar });
+      why.textContent = clerkDone ? S.classical.whyDone : S.classical.why;
+      nextBtn.textContent = clerkDone ? S.next.quantum : S.next.skipClerk;
+      return;
+    }
+    partTag.textContent = S.partB;
+    stepList.hidden = false;
+    cStep.dt.textContent = "Grover";
     const steps = round && !round.empty ? round.steps : 0;
     const M = round ? round.marked.length : 0;
     cBar.dd.textContent = String(bar);
@@ -265,10 +321,51 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
       label = S.next.measure;
     }
     nextBtn.textContent = label;
+    const idx = stepIndex();
+    stepItems.forEach((li, i) => {
+      li.classList.toggle("current", i === idx);
+      li.classList.toggle("done", i < idx);
+      if (i === idx) li.setAttribute("aria-current", "step");
+      else li.removeAttribute("aria-current");
+    });
+    const whyKey = sub === "done" ? "done" : sub === "measured-found" ? "found" : sub === "measured-unlucky" ? "unlucky" : sub === "oracled" ? "oracle" : s === 0 ? "start" : s < steps ? "reflect" : "measure";
+    why.textContent = fill(S.why[whyKey], { m: M, p: pct(p) });
   }
   const yourBill = () => (yourPlan === null ? -1 : plans[yourPlan].total);
 
+  function snap() {
+    history.push({ stage, bar, s, sub, found, roundNo });
+  }
+  function back() {
+    const h0 = history.pop();
+    if (!h0) return;
+    if (h0.stage === "classical") return beginClassical();
+    stage = "quantum";
+    bar = h0.bar;
+    round = planRound(plans, bar);
+    s = h0.s;
+    sub = h0.sub;
+    found = h0.found;
+    roundNo = h0.roundNo;
+    if (round.empty) show(Array(PLAN_COUNT).fill(1 / Math.sqrt(PLAN_COUNT)), { marked: false });
+    else if (sub === "oracled") {
+      const after = round.history[s + 1].afterOracle;
+      show(after, { marked: true, meanAt: mean(after) });
+    } else if (sub.startsWith("measured")) show(round.history[s].amplitudes, { marked: true, measuredK: found.k });
+    else show(round.history[s].amplitudes, { marked: s > 0 });
+    refresh();
+  }
+  backBtn2.addEventListener("click", () => {
+    setAuto(false);
+    back();
+  });
+
   function next() {
+    if (stage === "classical") {
+      history.push({ stage: "classical" }); // Back from Part 2 step 1 returns to Part 1
+      return beginRound(bar);
+    }
+    snap();
     if (sub === "done") return go("result");
     if (sub === "idle") {
       if (s < round.steps) {
@@ -325,8 +422,9 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
     go("simulate");
     setAuto(false);
     roundNo = 0;
+    history.length = 0;
     field.show(yourPlan, narrow());
-    beginRound(plans[yourPlan].total);
+    beginClassical();
   }
 
   // ======================================================== result
