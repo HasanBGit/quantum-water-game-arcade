@@ -28,9 +28,21 @@ export function createQuest({ stage, text, model = PRESETS.team, onComplete = ()
   const main = tasks.filter((x) => !x.optional);
   let announced = false;
 
+  // While the obvious-plan task is open, say which slots to switch on, how many are right, and which one is wrong.
+  let lastSlots = [0, 0, 0, 0, 0];
+  const greedyDetail = () => {
+    const want = state.greedySlots();
+    const price = (n) => model.prices[n - 1];
+    const list = [...want].sort((a, b) => price(a) - price(b)).map((n) => fill(text.slotPrice, { n, p: price(n) })).join(text.sep);
+    const k = want.filter((n) => lastSlots[n - 1]).length;
+    const wrong = lastSlots.map((v, i) => (v && !want.includes(i + 1) ? i + 1 : 0)).filter(Boolean)[0];
+    return wrong ? fill(text.greedyWrong, { n: wrong, p: price(wrong) }) : fill(text.greedyHint, { list, k });
+  };
   const nextLine = () => {
     const current = main.find((x) => !x.done);
-    return current ? fill(text.next, { task: current.label }) : text.complete;
+    if (!current) return text.complete;
+    const line = fill(text.next, { task: current.label });
+    return current.id === "greedy" ? `${line}. ${greedyDetail()}` : line;
   };
 
   function render() {
@@ -69,7 +81,12 @@ export function createQuest({ stage, text, model = PRESETS.team, onComplete = ()
     /** A helper's conversation reached a topic (not just the greeting). */
     talked: (helperId) => state.talked(helperId) && render(),
     /** The player's slots changed. */
-    slots: (slots) => state.slots(slots) && render(),
+    slots(slots) {
+      lastSlots = slots.slice();
+      // re-draw on every press while the obvious plan is the open task, so "k of 3" and the wrong-slot note stay current
+      const wasGreedy = state.next() === "greedy";
+      if (state.slots(slots) || wasGreedy) render();
+    },
     /** The game moved to another screen. */
     phase(phase) {
       root.hidden = phase !== "play" && phase !== "around";

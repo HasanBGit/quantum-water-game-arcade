@@ -146,15 +146,18 @@ export function createFlow({ root, model = PRESETS.team, text, list = DEFAULT_LI
 
   // The three steps follow the quest log (main.js calls setStep), so the pills, the goal line and the
   // tracker always say the same thing: 1 obvious plan, 2 Layla and a cheaper plan, 3 simulate.
+  // While the plan on the bill is not exactly 3 slots, the step is always 1 (Choose): that is what to fix first.
   let questStep = 1;
+  let legalNow = false;
   function showStep() {
+    const step = legalNow ? questStep : 1;
     pills.forEach((li, i) => {
-      li.classList.toggle("current", i + 1 === questStep);
-      li.classList.toggle("done", i + 1 < questStep);
-      if (i + 1 === questStep) li.setAttribute("aria-current", "step");
+      li.classList.toggle("current", i + 1 === step);
+      li.classList.toggle("done", i + 1 < step);
+      if (i + 1 === step) li.setAttribute("aria-current", "step");
       else li.removeAttribute("aria-current");
     });
-    coachStep.textContent = fill(text.stepOf, { n: questStep });
+    coachStep.textContent = fill(text.stepOf, { n: step });
   }
   showStep();
 
@@ -169,6 +172,7 @@ export function createFlow({ root, model = PRESETS.team, text, list = DEFAULT_LI
         bestLegal = b.total;
       }
     }
+    legalNow = legal;
     showStep();
     const v = { n: b.chosen, m: b.required - b.chosen, extra: b.chosen - b.required, total: b.total, r: b.restartEach };
     coachMsg.textContent = state === "empty" ? C.empty : fill(C[state], v);

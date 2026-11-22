@@ -379,6 +379,10 @@ export const STRINGS = {
         next: "Next: {task}",
         optional: "Extra",
         complete: "Quest complete. Well played.",
+        slotPrice: "{n} (price {p})",
+        sep: ", ",
+        greedyHint: "Switch on slots {list}. {k} of 3 right so far.",
+        greedyWrong: "Slot {n} costs {p}. That is not one of the 3 cheapest, so switch it off.",
         tasks: {
           noura: "Talk to Noura about prices",
           layla: "Ask Layla why the obvious plan costs more",
