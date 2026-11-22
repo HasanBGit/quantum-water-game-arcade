@@ -1,0 +1,260 @@
+[
+  {
+    "id": "utility_box_01",
+    "type": "models",
+    "source": "polyhaven",
+    "name": "Utility Box 01",
+    "url": "https://polyhaven.com/a/utility_box_01",
+    "licence": "CC0",
+    "authors": [
+      "James Ray Cock"
+    ],
+    "polycount": 4404,
+    "resolution": "1k",
+    "folder": "polyhaven/models/utility_box_01",
+    "main": "utility_box_01_1k.gltf",
+    "bytes": 1977061,
+    "fetched": "2026-11-22"
+  },
+  {
+    "id": "utility_box_02",
+    "type": "models",
+    "source": "polyhaven",
+    "name": "Utility Box 02",
+    "url": "https://polyhaven.com/a/utility_box_02",
+    "licence": "CC0",
+    "authors": [
+      "James Ray Cock"
+    ],
+    "polycount": 6268,
+    "resolution": "1k",
+    "folder": "polyhaven/models/utility_box_02",
+    "main": "utility_box_02_1k.gltf",
+    "bytes": 2029240,
+    "fetched": "2026-11-22"
+  },
+  {
+    "id": "power_box_01",
+    "type": "models",
+    "source": "polyhaven",
+    "name": "Power Box 01",
+    "url": "https://polyhaven.com/a/power_box_01",
+    "licence": "CC0",
+    "authors": [
+      "Rico Cilliers",
+      "Yann Kervran"
+    ],
+    "polycount": 21272,
+    "resolution": "1k",
+    "folder": "polyhaven/models/power_box_01",
+    "main": "power_box_01_1k.gltf",
+    "bytes": 2725643,
+    "fetched": "2026-11-22"
+  },
+  {
+    "id": "concrete_road_barrier_02",
+    "type": "models",
+    "source": "polyhaven",
+    "name": "Concrete Road Barrier 02",
+    "url": "https://polyhaven.com/a/concrete_road_barrier_02",
+    "licence": "CC0",
+    "authors": [
+      "Amal Kumar"
+    ],
+    "polycount": 42578,
+    "resolution": "1k",
+    "folder": "polyhaven/models/concrete_road_barrier_02",
+    "main": "concrete_road_barrier_02_1k.gltf",
+    "bytes": 2928100,
+    "fetched": "2026-11-22"
+  },
+  {
+    "id": "Barrel_01",
+    "type": "models",
+    "source": "polyhaven",
+    "name": "Barrel_01",
+    "url": "https://polyhaven.com/a/Barrel_01",
+    "licence": "CC0",
+    "authors": [
+      "Jorge Camacho"
+    ],
+    "polycount": 2682,
+    "resolution": "1k",
+    "folder": "polyhaven/models/Barrel_01",
+    "main": "Barrel_01_1k.gltf",
+    "bytes": 692947,
+    "fetched": "2026-11-22"
+  },
+  {
+    "id": "industrial_pastic_container",
+    "type": "models",
+    "source": "polyhaven",
+    "name": "Industrial Plastic Container",
+    "url": "https://polyhaven.com/a/industrial_pastic_container",
+    "licence": "CC0",
+    "authors": [
+      "Galo Benivegna"
+    ],
+    "polycount": 7118,
+    "resolution": "1k",
+    "folder": "polyhaven/models/industrial_pastic_container",
+    "main": "industrial_pastic_container_1k.gltf",
+    "bytes": 1567997,
+    "fetched": "2026-11-22"
+  },
+  {
+    "id": "portable_generator",
+    "type": "models",
+    "source": "polyhaven",
+    "name": "Portable Generator",
+    "url": "https://polyhaven.com/a/portable_generator",
+    "licence": "CC0",
+    "authors": [
+      "James Ray Cock"
+    ],
+    "polycount": 26419,
+    "resolution": "1k",
+    "folder": "polyhaven/models/portable_generator",
+    "main": "portable_generator_1k.gltf",
+    "bytes": 3434440,
+    "fetched": "2026-11-22"
+  },
+  {
+    "id": "water_manhole_cover",
+    "type": "models",
+    "source": "polyhaven",
+    "name": "Water Manhole Cover",
+    "url": "https://polyhaven.com/a/water_manhole_cover",
+    "licence": "CC0",
+    "authors": [
+      "Raunox"
+    ],
+    "polycount": 6301,
+    "resolution": "1k",
+    "folder": "polyhaven/models/water_manhole_cover",
+    "main": "water_manhole_cover_1k.gltf",
+    "bytes": 2333492,
+    "fetched": "2026-11-22"
+  },
+  {
+    "id": "blue_metal_plate",
+    "type": "textures",
+    "source": "polyhaven",
+    "name": "Blue Metal Plate",
+    "url": "https://polyhaven.com/a/blue_metal_plate",
+    "licence": "CC0",
+    "authors": [
+      "Rob Tuytel"
+    ],
+    "polycount": null,
+    "resolution": "1k",
+    "folder": "polyhaven/textures/blue_metal_plate",
+    "main": "diff.jpg",
+    "bytes": 1486956,
+    "fetched": "2026-11-22"
+  },
+  {
+    "id": "corrugated_iron",
+    "type": "textures",
+    "source": "polyhaven",
+    "name": "Corrugated Iron",
+    "url": "https://polyhaven.com/a/corrugated_iron",
+    "licence": "CC0",
+    "authors": [
+      "Jenelle van Heerden",
+      "Dimitrios Savva"
+    ],
+    "polycount": null,
+    "resolution": "1k",
+    "folder": "polyhaven/textures/corrugated_iron",
+    "main": "diff.jpg",
+    "bytes": 2669936,
+    "fetched": "2026-11-22"
+  },
+  {
+    "id": "aerial_beach_01",
+    "type": "textures",
+    "source": "polyhaven",
+    "name": "Aerial Beach 01",
+    "url": "https://polyhaven.com/a/aerial_beach_01",
+    "licence": "CC0",
+    "authors": [
+      "Rob Tuytel"
+    ],
+    "polycount": null,
+    "resolution": "1k",
+    "folder": "polyhaven/textures/aerial_beach_01",
+    "main": "diff.jpg",
+    "bytes": 1013799,
+    "fetched": "2026-11-22"
+  },
+  {
+    "id": "spiaggia_di_mondello",
+    "type": "hdris",
+    "source": "polyhaven",
+    "name": "Spiaggia di Mondello",
+    "url": "https://polyhaven.com/a/spiaggia_di_mondello",
+    "licence": "CC0",
+    "authors": [
+      "Andreas Mischok"
+    ],
+    "polycount": null,
+    "resolution": "1k",
+    "folder": "polyhaven/hdris/spiaggia_di_mondello",
+    "main": "spiaggia_di_mondello_1k.hdr",
+    "bytes": 1533242,
+    "fetched": "2026-11-22"
+  },
+  {
+    "id": "painted_plaster_wall",
+    "type": "textures",
+    "source": "polyhaven",
+    "name": "Painted Plaster Wall",
+    "url": "https://polyhaven.com/a/painted_plaster_wall",
+    "licence": "CC0",
+    "authors": [
+      "Amal Kumar"
+    ],
+    "polycount": null,
+    "resolution": "1k",
+    "folder": "polyhaven/textures/painted_plaster_wall",
+    "main": "diff.jpg",
+    "bytes": 3008860,
+    "fetched": "2026-11-22"
+  },
+  {
+    "id": "concrete_wall_004",
+    "type": "textures",
+    "source": "polyhaven",
+    "name": "Concrete Wall 004",
+    "url": "https://polyhaven.com/a/concrete_wall_004",
+    "licence": "CC0",
+    "authors": [
+      "Dario Barresi",
+      "Charlotte Baglioni"
+    ],
+    "polycount": null,
+    "resolution": "1k",
+    "folder": "polyhaven/textures/concrete_wall_004",
+    "main": "diff.jpg",
+    "bytes": 3517403,
+    "fetched": "2026-11-22"
+  },
+  {
+    "id": "asphalt_floor",
+    "type": "textures",
+    "source": "polyhaven",
+    "name": "Asphalt Floor",
+    "url": "https://polyhaven.com/a/asphalt_floor",
+    "licence": "CC0",
+    "authors": [
+      "eye-candy.xyz"
+    ],
+    "polycount": null,
+    "resolution": "1k",
+    "folder": "polyhaven/textures/asphalt_floor",
+    "main": "diff.jpg",
+    "bytes": 4638902,
+    "fetched": "2026-11-22"
+  }
+]

@@ -1,0 +1,8 @@
+node_modules
+dist
+.vite-cache
+.verify-dist-*
+verify-output
+.claude
+COORDINATION.md
+.DS_Store

@@ -1,0 +1,7 @@
+/* Arabic: a font stack that has Arabic letters, and right-to-left text. Panels keep their screen positions. */
+html[lang="ar"] {
+  --font: "Baloo Bhaijaan 2", "Cairo", "Noto Sans Arabic", "SF Arabic", "Geeza Pro", "Segoe UI", Tahoma, system-ui, sans-serif;
+}
+html[dir="rtl"] body { direction: rtl; }
+html[dir="rtl"] .dlg-line, html[dir="rtl"] .dlg-choice { text-align: right; }
+#lang { max-width: 9rem; }

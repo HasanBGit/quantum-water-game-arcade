@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Quantum Water</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2088%20104%22%3E%3Cpath%20d=%22M16%2052L13%2014L36%2033Z%22%20fill=%22%23ff9f1c%22%20stroke=%22%231b1b4b%22%20stroke-width=%225%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M72%2052L75%2014L52%2033Z%22%20fill=%22%23ff9f1c%22%20stroke=%22%231b1b4b%22%20stroke-width=%225%22%20stroke-linejoin=%22round%22/%3E%3Cellipse%20cx=%2244%22%20cy=%2264%22%20rx=%2234%22%20ry=%2230%22%20fill=%22%23ff9f1c%22%20stroke=%22%231b1b4b%22%20stroke-width=%225%22/%3E%3Cpath%20d=%22M30%2040h28v-4a14%2014%200%200%200-28%200z%22%20fill=%22%23fff%22%20stroke=%22%231b1b4b%22%20stroke-width=%224.5%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M26%2040h36%22%20stroke=%22%231b1b4b%22%20stroke-width=%225.5%22%20stroke-linecap=%22round%22/%3E%3Cpath%20d=%22M27%2061q5-8%2010%200M51%2061q5-8%2010%200%22%20fill=%22none%22%20stroke=%22%231b1b4b%22%20stroke-width=%224.5%22%20stroke-linecap=%22round%22/%3E%3Cpath%20d=%22M40%2067h8l-4%204z%22%20fill=%22%23ff5d73%22/%3E%3Cpath%20d=%22M44%2070q-4%207-10%203M44%2070q4%207%2010%203%22%20fill=%22none%22%20stroke=%22%231b1b4b%22%20stroke-width=%223.6%22%20stroke-linecap=%22round%22/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" />
+    <link rel="stylesheet" href="/src/game/game.css" />
+  </head>
+  <body>
+    <div class="stage">
+      <canvas id="scene" aria-label="3D view of a desalination plant. Walk with the arrow keys." tabindex="-1"></canvas>
+
+      <header class="bar">
+        <h1><span class="q">Quantum</span> Water</h1>
+        <p id="hint" class="hint"></p>
+      </header>
+
+      <div class="controls" role="group" aria-label="View and sound">
+        <button type="button" id="btn-overview" aria-pressed="false"></button>
+        <button type="button" id="btn-sound" aria-pressed="false"></button>
+        <select id="quality"></select>
+      </div>
+
+      <details id="bill" class="bill" open></details>
+      <button type="button" id="btn-use" hidden></button>
+
+      <div class="pad" role="group" aria-label="Walk">
+        <button type="button" data-dir="up" aria-label="Walk up">&uarr;</button>
+        <button type="button" data-dir="left" aria-label="Walk left">&larr;</button>
+        <button type="button" data-dir="down" aria-label="Walk down">&darr;</button>
+        <button type="button" data-dir="right" aria-label="Walk right">&rarr;</button>
+      </div>
+
+      <div id="flow"></div>
+      <div id="toasts" aria-hidden="true"></div>
+
+      <div id="loading" class="overlay" role="status">
+        <p id="loading-text"></p>
+        <progress id="loading-bar" max="100" value="0"></progress>
+      </div>
+      <div id="error" class="overlay" hidden>
+        <p id="error-text"></p>
+        <a id="error-link" href="./maths.html"></a>
+      </div>
+      <p id="status" class="sr-only" aria-live="polite"></p>
+    </div>
+    <noscript>Quantum Water needs JavaScript. The maths page is at /maths.html.</noscript>
+    <script type="module" src="/src/game/main.js"></script>
+  </body>
+</html>

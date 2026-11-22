@@ -1,0 +1,24 @@
+{
+  "name": "quantum-water-game",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "node --test test/math.test.js test/bill.test.js test/quality.test.js test/search.test.js test/site.test.js test/scripts.test.js test/room.test.js test/i18n.test.js",
+    "table": "node scripts/print-table.mjs",
+    "verify": "node scripts/verify-game.mjs",
+    "assets-doc": "node scripts/write-assets-md.mjs",
+    "prune-assets": "node scripts/prune-assets.mjs",
+    "verify:snapshot": "node scripts/verify-snapshot.mjs",
+    "room": "node server/room.mjs"
+  },
+  "dependencies": {
+    "@dgreenheck/ez-tree": "1.1.0",
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "vite": "8.3.8"
+  }
+}

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quantum Water: the room</title>
+<style>
+  :root { --navy: #1b1b4b; --grape: #8a5cff; --price: #ffd23f; --go: #55e07a; --water: #19c3d6; font-family: ui-rounded, "SF Pro Rounded", "Nunito", system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: linear-gradient(#5ad1ff, #b6ecff); color: var(--navy); min-height: 100vh; }
+  main { max-width: 64rem; margin: 0 auto; padding: 24px; }
+  h1 { margin: 0 0 8px; font-size: clamp(1.8rem, 4vw, 3rem); }
+  .card { background: #fff; border: 3px solid var(--navy); border-radius: 22px; box-shadow: 0 6px 0 var(--navy); padding: 16px 20px; margin: 16px 0; }
+  .join { font-size: clamp(1rem, 2.4vw, 1.6rem); font-weight: 700; word-break: break-all; }
+  .counts { display: flex; gap: 32px; flex-wrap: wrap; font-size: clamp(1.1rem, 2.6vw, 1.8rem); }
+  .counts b { font-size: 1.6em; font-variant-numeric: tabular-nums; }
+  .row { display: grid; grid-template-columns: 4.5rem 1fr 3rem; align-items: center; gap: 12px; margin: 8px 0; font-size: clamp(1rem, 2.2vw, 1.5rem); }
+  .bar { height: 34px; background: #eaf6ff; border: 3px solid var(--navy); border-radius: 12px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--grape); width: 0; transition: width .5s; }
+  .row.best .bar i { background: var(--go); }
+  .row.obvious .bar i { background: var(--price); }
+  .tag { font-weight: 800; }
+  button { font: inherit; font-weight: 700; min-height: 48px; padding: 0 20px; border: 3px solid var(--navy); border-radius: 16px; background: var(--price); color: var(--navy); cursor: pointer; box-shadow: 0 4px 0 var(--navy); }
+  button.quiet { background: #fff; }
+  .verdict { font-size: clamp(1.1rem, 2.4vw, 1.7rem); }
+  :focus-visible { outline: 4px solid var(--grape); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Quantum Water: the room</h1>
+  <div class="card">
+    <p style="margin:0 0 6px">Open this on your phone and pick your 3 slots:</p>
+    <p class="join" id="join">Looking for the Wi-Fi address...</p>
+  </div>
+  <div class="card counts" aria-live="polite">
+    <div><b id="voters">0</b> people joined</div>
+    <div><b id="legal">0</b> sent a plan</div>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">Which bill did the room get?</h2>
+    <div id="bars"></div>
+    <p class="verdict" id="verdict"></p>
+    <p style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:0">
+      <button id="reveal" type="button" aria-pressed="false">Show the cheapest plan</button>
+      <button id="reset" class="quiet" type="button">Start over</button>
+    </p>
+  </div>
+</main>
+<script type="module">
+  const $ = (id) => document.getElementById(id);
+  let revealed = false;
+  let last = null;
+
+  async function info() {
+    const i = await (await fetch("/api/info")).json();
+    $("join").textContent = i.urls.length ? i.urls.join("   or   ") : "Connect this computer to Wi-Fi, then restart the room server.";
+  }
+  function draw(r) {
+    last = r;
+    $("voters").textContent = r.voters;
+    $("legal").textContent = r.legal;
+    const max = Math.max(1, ...r.bills.map((b) => b.count));
+    $("bars").replaceChildren(...r.bills.map((b) => {
+      const row = document.createElement("div");
+      const isBest = revealed && b.bill === r.best.bill;
+      const isObvious = revealed && b.bill === r.obvious.bill;
+      row.className = `row${isBest ? " best" : ""}${isObvious ? " obvious" : ""}`;
+      row.innerHTML = `<span class="tag">Bill ${b.bill}</span><span class="bar"><i style="width:${(b.count / max) * 100}%"></i></span><span>${b.count}</span>`;
+      return row;
+    }));
+    $("verdict").textContent = revealed
+      ? `Cheapest: bill ${r.best.bill}, slots ${r.best.slots.join(", ")}. ${r.foundBest} of ${r.legal} found it. ${r.pickedObvious} picked the 3 cheapest slots (bill ${r.obvious.bill}).`
+      : "";
+  }
+  async function poll() {
+    try { draw(await (await fetch("/api/results")).json()); } catch {}
+  }
+  $("reveal").addEventListener("click", () => {
+    revealed = !revealed;
+    $("reveal").setAttribute("aria-pressed", String(revealed));
+    $("reveal").textContent = revealed ? "Hide the cheapest plan" : "Show the cheapest plan";
+    if (last) draw(last);
+  });
+  $("reset").addEventListener("click", async () => { await fetch("/api/reset", { method: "POST" }); revealed = false; $("reveal").setAttribute("aria-pressed", "false"); $("reveal").textContent = "Show the cheapest plan"; poll(); });
+  info();
+  poll();
+  setInterval(poll, 2000);
+</script>
+</body>
+</html>

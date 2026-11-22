@@ -1,0 +1,132 @@
+/* Conversations, the Talk button and the quest log. Same sticker look as the rest of the game. */
+
+/* ---- dialogue box: bottom, about a fifth of the screen */
+#dialogue {
+  position: absolute;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(42rem, calc(100% - 2 * var(--gutter)));
+  max-height: 58vh;
+  overflow: auto;
+  padding: 14px 20px 14px;
+  background: var(--panel);
+  border: var(--outline);
+  border-radius: 22px;
+  box-shadow: var(--lift);
+  z-index: 20;
+  outline: none;
+}
+#dialogue[hidden] { display: none; }
+.dlg-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 4px 16px 4px 10px;
+  background: var(--navy);
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.dlg-name::before { content: ""; width: 14px; height: 14px; border-radius: 50%; background: var(--who, var(--grape)); border: 2px solid #fff; }
+.dlg-line { margin: 0 0 12px; min-height: 3em; font-size: 1.125rem; line-height: 1.5; max-width: 38rem; }
+#dialogue.more:not(.has-choices) .dlg-line::after { content: " \25BC"; font-size: 0.8em; color: var(--grape); animation: dlg-bob 0.9s ease-in-out infinite; }
+@keyframes dlg-bob { 50% { opacity: 0.25; } }
+.dlg-choices { display: grid; gap: 8px; }
+.dlg-choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 8px 14px;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+  border: var(--outline);
+  border-radius: 14px;
+  cursor: pointer;
+}
+.dlg-choice .num {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--navy);
+  color: #fff;
+  font-weight: 700;
+}
+.dlg-choice[aria-current="true"] { background: var(--price); }
+.dlg-choice:focus-visible { outline: 3px solid var(--grape); outline-offset: 2px; }
+.dlg-hint { margin: 10px 0 0; font-size: 0.8125rem; color: #4b4b86; }
+body[data-talking] .pad,
+body[data-talking] #btn-use,
+body[data-talking] #btn-talk,
+body[data-talking] .quest,
+body[data-talking] #npc-layer { display: none; }
+
+/* ---- Talk button (shown when you stand near a helper and no control post is in reach) */
+#btn-talk {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  min-height: 60px;
+  padding: 0 28px;
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--go);
+  border: var(--outline);
+  border-radius: 18px;
+  box-shadow: var(--lift);
+  cursor: pointer;
+  z-index: 3;
+}
+#btn-talk::before {
+  content: "E";
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+  border-radius: 8px;
+  background: var(--navy);
+  color: #fff;
+}
+#btn-talk[hidden] { display: none; }
+body[data-mode="overview"] #btn-talk { display: none; }
+
+/* ---- quest log */
+.quest {
+  position: absolute;
+  left: var(--gutter);
+  bottom: 16px;
+  width: min(19rem, calc(100% - 2 * var(--gutter)));
+  padding: 8px 14px;
+  background: var(--panel);
+  border: var(--outline);
+  border-radius: 18px;
+  box-shadow: var(--lift);
+}
+.quest[hidden] { display: none; }
+.quest summary { cursor: pointer; font-weight: 700; min-height: 28px; display: flex; align-items: center; }
+.quest ul { margin: 6px 0 2px; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 0.9375rem; }
+.quest li { position: relative; padding-left: 28px; }
+.quest li::before { content: ""; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border: 2px solid var(--navy); border-radius: 5px; background: #fff; }
+.quest li.done { color: #4b4b86; text-decoration: line-through; }
+.quest li.done::before { background: var(--go); }
+.quest.complete summary { color: #1f8f4a; }
+
+@media (max-width: 700px) {
+  #btn-talk { left: var(--gutter); bottom: calc(max(16px, env(safe-area-inset-bottom)) + 150px); transform: none; }
+  /* top right, beside the title chip: the bottom of the screen belongs to the Talk button, the arrow pad and the bill */
+  .quest { top: 12px; bottom: auto; left: auto; right: var(--gutter); width: auto; max-width: 17rem; }
+  .quest:not([open]) { max-width: 11rem; }
+  #dialogue { max-height: 62vh; }
+}
+@media (prefers-reduced-motion: reduce) { #dialogue.more .dlg-line::after { animation: none; } }

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quantum Water: your plan</title>
+<style>
+  :root { --navy: #1b1b4b; --grape: #8a5cff; --price: #ffd23f; --go: #55e07a; --alert: #ff5d73; --panel: #fff; font-family: ui-rounded, "SF Pro Rounded", "Nunito", system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: linear-gradient(#5ad1ff, #b6ecff); color: var(--navy); min-height: 100vh; }
+  main { max-width: 30rem; margin: 0 auto; padding: 16px; }
+  h1 { margin: 8px 0; font-size: 1.6rem; }
+  .card { background: var(--panel); border: 3px solid var(--navy); border-radius: 20px; box-shadow: 0 5px 0 var(--navy); padding: 14px 16px; margin: 12px 0; }
+  .slots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .slots button { min-height: 72px; font: inherit; font-weight: 700; border: 3px solid var(--navy); border-radius: 16px; background: #fff; color: var(--navy); cursor: pointer; display: grid; place-items: center; padding: 4px 0; }
+  .slots button[aria-pressed="true"] { background: var(--go); }
+  .slots .price { font-size: .8rem; font-weight: 600; }
+  dl { margin: 0; } .line { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 2px dashed #c9d6ee; }
+  dt { color: #4b4b86; } dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+  .total { font-weight: 800; font-size: 1.25rem; border-bottom: 0; }
+  #msg { margin: 8px 0 0; font-weight: 600; }
+  #send { width: 100%; min-height: 56px; font: inherit; font-size: 1.1rem; font-weight: 800; border: 3px solid var(--navy); border-radius: 18px; background: var(--price); color: var(--navy); box-shadow: 0 5px 0 var(--navy); cursor: pointer; }
+  #send:disabled { opacity: .5; box-shadow: none; cursor: not-allowed; }
+  :focus-visible { outline: 4px solid var(--grape); outline-offset: 2px; }
+  .note { font-size: .875rem; color: #4b4b86; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Your plan</h1>
+  <p>Run exactly 3 of the 5 time slots, at the lowest total bill. Every restart of a pump costs extra.</p>
+  <div class="card">
+    <div class="slots" id="slots" role="group" aria-label="Pump slots"></div>
+  </div>
+  <div class="card">
+    <dl>
+      <div class="line"><dt>Electricity</dt><dd id="elec"></dd></div>
+      <div class="line"><dt>Restarts</dt><dd id="starts"></dd></div>
+      <div class="line"><dt>Rule penalty</dt><dd id="pen"></dd></div>
+      <div class="line total"><dt>Total</dt><dd id="total"></dd></div>
+    </dl>
+    <p id="msg" role="status"></p>
+  </div>
+  <button id="send" type="button" disabled>Send my plan</button>
+  <p id="sent" role="status" class="note"></p>
+  <p class="note">The numbers are made up for teaching. Your plan goes to the big screen without your name.</p>
+</main>
+<script type="module">
+  import { PRESETS, evaluate, chosenSlots, REQUIRED } from "/math/index.js";
+  const model = PRESETS.team;
+  const x = [0, 0, 0, 0, 0];
+  const $ = (id) => document.getElementById(id);
+  let voter;
+  try { voter = localStorage.getItem("qw-voter"); if (!voter) { voter = crypto.randomUUID(); localStorage.setItem("qw-voter", voter); } } catch { voter = crypto.randomUUID(); }
+
+  model.prices.forEach((p, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.setAttribute("aria-pressed", "false");
+    b.innerHTML = `<span>Slot ${i + 1}</span><span class="price">price ${p}</span>`;
+    b.addEventListener("click", () => { x[i] = x[i] ? 0 : 1; b.setAttribute("aria-pressed", String(Boolean(x[i]))); $("sent").textContent = ""; update(); });
+    $("slots").append(b);
+  });
+
+  function update() {
+    const e = evaluate(model, x);
+    const prices = chosenSlots(x).map((s) => model.prices[s - 1]);
+    $("elec").textContent = prices.length ? `${prices.join(" + ")} = ${e.electricity}` : "none = 0";
+    $("starts").textContent = `${e.starts} × ${model.restart} = ${e.restartCost}`;
+    $("pen").textContent = `${model.penalty} × (${e.chosen} − ${REQUIRED})² = ${e.penalty}`;
+    $("total").textContent = String(e.total);
+    $("msg").textContent = e.chosen === REQUIRED ? "3 slots on. Send it, or try to find a cheaper plan." : e.chosen < REQUIRED ? `${e.chosen} of 3 on. Switch on ${REQUIRED - e.chosen} more.` : `${e.chosen} on. The rule is exactly 3. Switch ${e.chosen - REQUIRED} off.`;
+    $("send").disabled = e.chosen !== REQUIRED;
+  }
+  $("send").addEventListener("click", async () => {
+    $("send").disabled = true;
+    try {
+      const r = await fetch("/api/vote", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ voter, slots: x }) });
+      $("sent").textContent = r.ok ? "Sent. You can change it and send again." : "The room did not accept that. Check the plan and try again.";
+    } catch { $("sent").textContent = "Could not reach the big screen. Check you are on the same Wi-Fi."; }
+    update();
+  });
+  update();
+</script>
+</body>
+</html>
