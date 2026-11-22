@@ -748,7 +748,7 @@ async function main() {
   await tap("Tab");
   const f2 = await b.evaluate("document.activeElement.id");
   const outline = await b.evaluate("getComputedStyle(document.activeElement).outlineStyle + ' ' + getComputedStyle(document.activeElement).outlineWidth");
-  record("keyboard", "Tab reaches Settings, then Overview and Sound inside it, with a visible focus ring", f0 === "btn-settings" && f1 === "btn-overview" && f2 === "btn-pov" && !outline.startsWith("none") ? "PASS" : "FAIL", `focus order: ${f1}, ${f2}; outline on focused control: ${outline}`);
+  record("keyboard", "Tab reaches Settings, then Overview and First person inside it, with a visible focus ring", f0 === "btn-settings" && f1 === "btn-overview" && f2 === "btn-pov" && !outline.startsWith("none") ? "PASS" : "FAIL", `focus order: ${f0}, ${f1}, ${f2}; outline on focused control: ${outline}`);
 
   // ---- 8. Phone-sized screen with touch
   await b.send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
