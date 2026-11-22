@@ -3,6 +3,7 @@
 // if the tariff changes. Bubbles are plain HTML placed over the canvas, like the site tags.
 import * as THREE from "three";
 import { buildPerson, NPC_LOOKS } from "./characters.js";
+import { joinWithAnd, DEFAULT_LIST } from "./listText.js";
 
 export const TALK_RANGE = 3.4;
 const SPEED = 1.0;
@@ -21,13 +22,13 @@ const ROUTES = {
 const v = new THREE.Vector3();
 
 /** Numbers the clue text can use, taken from the model. */
-function facts(model, slots) {
+function facts(model, slots, L) {
   const idx = model.prices.map((_, i) => i);
   const byPrice = idx.slice().sort((a, b) => model.prices[a] - model.prices[b] || a - b);
   const cheap = byPrice.slice(0, 3).map((i) => i + 1).sort((a, b) => a - b);
   const top = byPrice[byPrice.length - 1];
   return {
-    cheap: `${cheap.slice(0, -1).join(", ")} and ${cheap[cheap.length - 1]}`,
+    cheap: joinWithAnd(cheap, L),
     priciest: top + 1,
     pmax: model.prices[top],
     pmin: model.prices[byPrice[0]],
@@ -38,7 +39,7 @@ function facts(model, slots) {
 }
 const fill = (s, vals) => s.replace(/\{(\w+)\}/g, (_, k) => (k in vals ? vals[k] : `{${k}}`));
 
-export function createNpcs({ scene, stage, canvas, camera, text, model, blocked, reduceMotion }) {
+export function createNpcs({ scene, stage, canvas, camera, text, model, blocked, reduceMotion, list = DEFAULT_LIST }) {
   const layer = document.createElement("div");
   layer.id = "npc-layer";
   layer.setAttribute("aria-hidden", "true"); // the same clues are read out through the live status line
@@ -136,7 +137,7 @@ export function createNpcs({ scene, stage, canvas, camera, text, model, blocked,
   return {
     /** Call once per frame. `player` is { x, z }. `canTalk` is false on the intro, simulate and result screens. */
     update(dt, player, canTalk, slots, quiet = false) {
-      const vals = facts(model, slots);
+      const vals = facts(model, slots, list);
       let best = null;
       let bestDist = Infinity;
       for (const n of npcs) {

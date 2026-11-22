@@ -9,6 +9,7 @@ import * as THREE from "three";
 import "./simview.css";
 import { allPlans, chosenSlots, PLAN_COUNT } from "../math/index.js";
 import { SLOT_COLORS, NAVY } from "./palette.js";
+import { joinSlots, DEFAULT_LIST } from "./listText.js";
 
 const TOWER_H = 4.2;
 const SVGNS = "http://www.w3.org/2000/svg";
@@ -44,7 +45,7 @@ function labelTexture(text, color) {
   return tex;
 }
 
-export function createSimView({ scene, stage, canvas, camera, field, bays, model, text, reduceMotion }) {
+export function createSimView({ scene, stage, canvas, camera, field, bays, model, text, reduceMotion, list = DEFAULT_LIST }) {
   const plans = allPlans(model);
   const uses = plans.map((p) => chosenSlots(p.x));
   const bill = plans.map((p) => p.total);
@@ -148,7 +149,7 @@ export function createSimView({ scene, stage, canvas, camera, field, bays, model
 
   function refreshInfo() {
     if (pinned !== null) {
-      info.textContent = T.pinned.replace("{slots}", uses[pinned].join(", ")).replace("{bill}", String(bill[pinned]));
+      info.textContent = T.pinned.replace("{slots}", joinSlots(uses[pinned], list)).replace("{bill}", String(bill[pinned]));
     } else {
       info.textContent = T.live.replace("{bill}", chance().expected.toFixed(1));
     }

@@ -11,6 +11,7 @@ import {
   successProbability,
 } from "../math/index.js";
 import { billLines } from "./bill.js";
+import { joinWithAnd, DEFAULT_LIST } from "./listText.js";
 
 const pct = (p) => `${(p * 100).toFixed(1)}%`;
 export const fill = (s, vals) => s.replace(/\{(\w+)\}/g, (_, k) => (k in vals ? vals[k] : `{${k}}`));
@@ -19,7 +20,7 @@ export const fill = (s, vals) => s.replace(/\{(\w+)\}/g, (_, k) => (k in vals ? 
 export const DEMO = { block: [0, 0, 1, 1, 1], islands: [1, 0, 1, 0, 1] };
 
 /** Everything the conversation text can name. */
-export function dialogueVars(model, slots) {
+export function dialogueVars(model, slots, L = DEFAULT_LIST) {
   const byPrice = model.prices.map((p, i) => i).sort((a, b) => model.prices[a] - model.prices[b] || a - b);
   const cheap = byPrice.slice(0, 3).map((i) => i + 1).sort((a, b) => a - b);
   const top = byPrice[byPrice.length - 1];
@@ -34,7 +35,7 @@ export function dialogueVars(model, slots) {
     pmin: model.prices[byPrice[0]],
     priciest: top + 1,
     pmax: model.prices[top],
-    cheap: `${cheap.slice(0, -1).join(", ")} and ${cheap[cheap.length - 1]}`,
+    cheap: joinWithAnd(cheap, L),
     n_plans: PLAN_COUNT,
     b24: formatBig(plansForSlots(24)),
     b240: formatBig(plansForSlots(240)),

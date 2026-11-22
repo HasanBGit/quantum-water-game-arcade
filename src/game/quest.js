@@ -57,7 +57,7 @@ export function createQuest({ stage, text, model = PRESETS.team, onComplete = ()
       }),
     );
     root.classList.toggle("complete", done === main.length);
-    onChange(nextLine());
+    onChange(nextLine(), state.step());
     if (done === main.length && !announced) {
       announced = true;
       onComplete(text.complete);
@@ -77,6 +77,8 @@ export function createQuest({ stage, text, model = PRESETS.team, onComplete = ()
     },
     /** The line for the current task, e.g. "Next: Press Simulate and watch the search". */
     nextLine,
+    /** The coach step (1 to 3) the quest is in. */
+    step: () => state.step(),
     /** The id of the first task not done yet, or null when all are. */
     next: () => state.next(),
     /** The slots (1 to 5) the obvious plan switches on. */

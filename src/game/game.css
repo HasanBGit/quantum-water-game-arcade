@@ -422,3 +422,6 @@ body[data-mode="overview"] #btn-pov, body[data-phase]:not([data-phase="play"]) #
 
 /* The open Settings panel sits above the bill, which hung over its first button. Still under conversations (20). */
 .controls { z-index: 8; }
+
+/* the arrow pad keeps its physical layout in right-to-left (Arabic): the left arrow stays on the left */
+.pad { direction: ltr; }

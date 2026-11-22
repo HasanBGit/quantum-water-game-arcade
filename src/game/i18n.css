@@ -5,3 +5,69 @@ html[lang="ar"] {
 html[dir="rtl"] body { direction: rtl; }
 html[dir="rtl"] .dlg-line, html[dir="rtl"] .dlg-choice { text-align: right; }
 #lang { max-width: 9rem; }
+
+/* ---- Arabic, right to left: reading text, chat, badges, lists and bars follow the reading direction.
+   The game panels (title chip, controls, bill, arrow pad) keep their screen positions. */
+html[dir="rtl"] .dlg-line,
+html[dir="rtl"] .dlg-choice,
+html[dir="rtl"] .npc-say { text-align: right; }
+@media (min-width: 701px) { html[dir="rtl"] .svbtns button { text-align: right; } }
+html[dir="rtl"] .dlg-name { padding: 4px 10px 4px 16px; }
+/* the E on the Talk and Use buttons comes first in reading order, so it sits on the right of the text */
+html[dir="rtl"] #btn-talk::before,
+html[dir="rtl"] #btn-use::before { margin-right: 0; margin-left: 10px; }
+/* the bill: names on the right, numbers on the left */
+html[dir="rtl"] .bill dd { text-align: left; }
+html[dir="rtl"] .bill summary::after { margin-left: 0; margin-right: auto; }
+/* quest log: the tick box is on the right */
+html[dir="rtl"] .quest li { padding-left: 0; padding-right: 28px; }
+html[dir="rtl"] .quest li::before { left: auto; right: 2px; }
+html[dir="rtl"] .quest li em { margin-left: 0; margin-right: 4px; }
+/* the cat in the coach card is on the right, where reading starts */
+html[dir="rtl"] .coach { padding: 10px 76px 12px 14px; }
+html[dir="rtl"] .coachtoggle,
+html[dir="rtl"] .coachmascot { left: auto; right: -6px; }
+/* reading cards (intro, result, site report) */
+html[dir="rtl"] .lvl .badge { left: auto; right: 12px; }
+html[dir="rtl"] .time { margin-left: 0; margin-right: 8px; }
+html[dir="rtl"] .learn,
+html[dir="rtl"] .sitewhy { padding-left: 0; padding-right: 1.2rem; }
+html[dir="rtl"] .warn { border-left-width: 3px; border-right-width: 10px; }
+html[dir="rtl"] .zoom th,
+html[dir="rtl"] .zoom td { text-align: right; }
+html[dir="rtl"] .zoom td:last-child { text-align: left; }
+html[dir="rtl"] .site { border-left: 1px solid var(--line); border-right: 6px solid var(--water); }
+html[dir="rtl"] .site.lost { border-right-color: var(--alert); }
+html[dir="rtl"] .sitelist li { border-left: 0; border-right: 5px solid var(--line); }
+html[dir="rtl"] .sitelist .site-match { border-right-color: var(--water); }
+html[dir="rtl"] .sitelist .site-extra { border-right-color: var(--alert); }
+html[dir="rtl"] .sitelist .site-missed { border-right-color: var(--price); }
+/* the speech-bubble tip under a helper's bubble is centred, so it needs no change */
+@media (max-width: 700px) {
+  html[dir="rtl"] .coach { padding: 8px 54px 10px 10px; }
+  html[dir="rtl"] .coachtoggle { left: auto; right: -4px; }
+  html[dir="rtl"] .coach.collapsed { padding: 6px; }
+  html[dir="rtl"] .coach.collapsed .coachtoggle { position: static; }
+}
+/* the tip of the cat's speech bubble points to the cat, which is on the right */
+html[dir="rtl"] .bubble::before { left: auto; right: -11px; border-right: 0; border-left: 8px solid var(--navy); }
+
+/* ---- Arabic reading comfort: more line spacing, no letter spacing, lighter weight for running text,
+   and a slightly larger size for the small print (Arabic letters look smaller than Latin ones at the same size). */
+html[lang="ar"] body { line-height: 1.65; letter-spacing: 0; }
+html[lang="ar"] .lead, html[lang="ar"] .card p, html[lang="ar"] .dlg-line, html[lang="ar"] .coach p,
+html[lang="ar"] .bubble, html[lang="ar"] .npc-say, html[lang="ar"] .learn li, html[lang="ar"] .mix li { line-height: 1.75; }
+html[lang="ar"] .simtop .caption { line-height: 1.7; }
+html[lang="ar"] .why-line { line-height: 1.75; font-weight: 500; font-size: 0.875rem; }
+html[lang="ar"] .note, html[lang="ar"] .honestline, html[lang="ar"] .dlg-hint { font-size: 0.9375rem; }
+html[lang="ar"] .parttag { font-size: 0.9375rem; }
+@media (max-width: 700px) {
+  html[lang="ar"] .why-line { font-size: 0.8125rem; margin-top: 4px; }
+  html[lang="ar"] .simsteps li { font-size: 0.6875rem; }
+}
+
+/* Arabic result tags above the pumps: the labels are longer than the English ones, so on a phone they are narrower,
+   wrap onto two lines and keep clear of the next pump's tag. */
+@media (max-width: 700px) {
+  html[lang="ar"] .site-tag { max-width: 3.7rem; padding: 2px 2px 3px; font-size: 0.625rem; line-height: 1.35; text-align: center; overflow-wrap: anywhere; }
+}

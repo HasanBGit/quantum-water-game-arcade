@@ -56,6 +56,18 @@ $("btn-pov").textContent = t.pov;
 $("btn-sound").textContent = t.soundOff;
 $("error-link").textContent = t.errorLink;
 $("loading-text").textContent = t.loading;
+canvas.setAttribute("aria-label", t.canvasLabel);
+// The title chip and the tab title follow the language: the first word keeps its colour.
+document.title = t.flow.intro.title;
+{
+  const [first, ...rest] = t.flow.intro.title.split(" ");
+  const q = document.createElement("span");
+  q.className = "q";
+  q.textContent = first;
+  document.querySelector(".bar h1").replaceChildren(q, ` ${rest.join(" ")}`);
+}
+document.querySelector(".pad").setAttribute("aria-label", t.pad.label);
+for (const b of document.querySelectorAll(".pad button")) b.setAttribute("aria-label", t.pad[b.dataset.dir]);
 $("quality").setAttribute("aria-label", t.quality.label);
 for (const [value, label] of Object.entries({ auto: t.quality.auto, high: t.quality.high, medium: t.quality.medium, low: t.quality.low })) {
   $("quality").append(new Option(label, value));
@@ -220,7 +232,7 @@ async function start() {
   let coldClock = 0;
   const field = createTankField({ scene, model, reduceMotion });
   // Simulate in the real plant: electricity towers at the pumps, with the tank yard and chart as options.
-  const simView = createSimView({ scene, stage: document.querySelector(".stage"), canvas, camera, field, bays: world.pumpBays, model, text: t.flow.simview, reduceMotion });
+  const simView = createSimView({ scene, stage: document.querySelector(".stage"), canvas, camera, field, bays: world.pumpBays, model, text: t.flow.simview, reduceMotion, list: t.list });
   const arcade = createArcade3d(scene, world.terminals, world.pumpBays, model);
   const panel = createBillPanel({ root: $("bill"), model, text: t.bill, onToggle: (i) => toggleSlot(i) });
   if (window.innerWidth <= 700) $("bill").open = false;
@@ -471,7 +483,7 @@ async function start() {
   });
 
   // ---- helpers who walk the plant and give clues when you stand close
-  const npcs = createNpcs({ scene, stage: document.querySelector(".stage"), canvas, camera, text: t.npcs, model, blocked: (x, z) => blocked(x, z), reduceMotion });
+  const npcs = createNpcs({ scene, stage: document.querySelector(".stage"), canvas, camera, text: t.npcs, model, blocked: (x, z) => blocked(x, z), reduceMotion, list: t.list });
   npcs.onSay((msg) => ($("status").textContent = msg));
   // fewer draw calls: merge each person's static parts and use a blob shadow instead of real shadows
   cheapPeople(operator);
@@ -481,12 +493,17 @@ async function start() {
   const stageEl = document.querySelector(".stage");
   const plansAll = allPlans(model);
   const progress = { predictions: [] };
-  quest = createQuest({ stage: stageEl, text: t.quest, model, onComplete: (msg) => ($("status").textContent = msg), onChange: (line) => flow && flow.setGoal(line) });
+  quest = createQuest({ stage: stageEl, text: t.quest, model, onComplete: (msg) => ($("status").textContent = msg), onChange: (line, step) => {
+      if (!flow) return;
+      flow.setGoal(line);
+      flow.setStep(step);
+    },
+  });
   dialogue = createDialogue({
     stage: stageEl,
     text: t.dialogue,
     reduceMotion,
-    getVars: () => dialogueVars(model, slots),
+    getVars: () => dialogueVars(model, slots, t.list),
     effects: {
       obvious: () => applySlots(greedyPlan(model, plansAll).x, { shake: true }),
       block: () => applySlots(DEMO.block, { shake: true }),
@@ -647,6 +664,7 @@ async function start() {
   flow = createFlow({
     root: $("flow"),
     text: t.flow,
+    list: t.list,
     reduceMotion,
     field,
     narrow: () => canvas.clientWidth / Math.max(canvas.clientHeight, 1) < 0.8,
@@ -673,6 +691,7 @@ async function start() {
     },
   });
   flow.setGoal(quest.nextLine());
+  flow.setStep(quest.step());
   flow.start(new URLSearchParams(location.search).has("skip"));
 
   const clock = new THREE.Clock();

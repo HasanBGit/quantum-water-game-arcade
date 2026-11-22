@@ -8,6 +8,7 @@ import {
 } from "../math/index.js";
 import { billLines, billState } from "./bill.js";
 import { siteReport } from "./siteReport.js";
+import { joinSlots, DEFAULT_LIST } from "./listText.js";
 
 const fill = (s, v = {}) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]);
 const pct = (p) => `${(p * 100).toFixed(1)}%`;
@@ -54,9 +55,9 @@ function toast(text) {
   setTimeout(() => el.remove(), 2200);
 }
 
-export function createFlow({ root, model = PRESETS.team, text, reduceMotion, field, narrow = () => false, getSlots, setSlots, onPhase }) {
+export function createFlow({ root, model = PRESETS.team, text, list = DEFAULT_LIST, reduceMotion, field, narrow = () => false, getSlots, setSlots, onPhase }) {
   const plans = allPlans(model);
-  const slotsLabel = (x) => chosenSlots(x).join(", ") || "none";
+  const slotsLabel = (x) => joinSlots(chosenSlots(x), list);
 
   // ---- progress
   let phase = "";
@@ -91,7 +92,7 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
     "title",
     "card intro",
     h("div", { class: "bubbles", "aria-hidden": "true" }, [0, 1, 2, 3, 4, 5].map((i) => h("i", { style: `--i:${i}` }))),
-    h("div", { class: "hero" }, mascot("mascot big"), h("h2", { id: "intro-title", tabindex: "-1" }, h("span", { class: "q" }, "Quantum"), " Water")),
+    h("div", { class: "hero" }, mascot("mascot big"), h("h2", { id: "intro-title", tabindex: "-1" }, h("span", { class: "q" }, I.title.split(" ")[0]), ` ${I.title.split(" ").slice(1).join(" ")}`)),
     h("p", { class: "lead" }, I.lead),
     h("h3", {}, I.howTitle),
     h(
@@ -127,7 +128,7 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
     "coach collapsed",
     coachToggle,
     coachStep,
-    h("ol", { class: "pills", "aria-label": "Steps" }, pills),
+    h("ol", { class: "pills", "aria-label": C.stepsLabel }, pills),
     coachGoal,
     coachMsg,
     coachTip,
@@ -143,6 +144,20 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
   phoneMq.addEventListener("change", syncCoachToggle);
   syncCoachToggle();
 
+  // The three steps follow the quest log (main.js calls setStep), so the pills, the goal line and the
+  // tracker always say the same thing: 1 obvious plan, 2 Layla and a cheaper plan, 3 simulate.
+  let questStep = 1;
+  function showStep() {
+    pills.forEach((li, i) => {
+      li.classList.toggle("current", i + 1 === questStep);
+      li.classList.toggle("done", i + 1 < questStep);
+      if (i + 1 === questStep) li.setAttribute("aria-current", "step");
+      else li.removeAttribute("aria-current");
+    });
+    coachStep.textContent = fill(text.stepOf, { n: questStep });
+  }
+  showStep();
+
   function updateCoach(slots) {
     const b = billLines(model, slots);
     const state = billState(b);
@@ -154,17 +169,10 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
         bestLegal = b.total;
       }
     }
-    const step = !legal ? 1 : tried.size >= 2 ? 3 : 2;
-    pills.forEach((li, i) => {
-      li.classList.toggle("current", i + 1 === step);
-      li.classList.toggle("done", i + 1 < step);
-      if (i + 1 === step) li.setAttribute("aria-current", "step");
-      else li.removeAttribute("aria-current");
-    });
-    coachStep.textContent = fill(text.stepOf, { n: step });
+    showStep();
     const v = { n: b.chosen, m: b.required - b.chosen, extra: b.chosen - b.required, total: b.total, r: b.restartEach };
     coachMsg.textContent = state === "empty" ? C.empty : fill(C[state], v);
-    coachTip.textContent = legal ? `${fill(C.tip, v)} ${tried.size >= 2 ? C.readyMore : ""}`.trim() : "";
+    coachTip.textContent = legal ? `${fill(C.tip, v)} ${questStep === 3 ? C.readyMore : ""}`.trim() : "";
     coachBest.textContent = bestLegal === null ? C.noBest : fill(C.best, { b: bestLegal });
     simBtn.disabled = !legal;
     simWhy.textContent = legal ? "" : C.needThree;
@@ -292,7 +300,7 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
     }
     partTag.textContent = S.partB;
     stepList.hidden = false;
-    cStep.dt.textContent = "Grover";
+    cStep.dt.textContent = S.grover;
     const steps = round && !round.empty ? round.steps : 0;
     const M = round ? round.marked.length : 0;
     cBar.dd.textContent = String(bar);
@@ -458,22 +466,22 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
   function siteBlock(mine, best) {
     const W = R.site;
     const rep = siteReport(model, mine, mine.total === best.total ? mine : best);
-    const list = (a) => a.join(", ");
+    const joinL = (a) => a.join(list.sep);
     const why = [];
     if (rep.won) {
-      why.push(rep.starts ? fill(W.why.startsWon, { s: rep.starts, cold: list(rep.coldSlots), r: model.restart }) : W.why.noStarts);
+      why.push(rep.starts ? fill(W.why.startsWon, { s: rep.starts, cold: joinL(rep.coldSlots), r: model.restart }) : W.why.noStarts);
       why.push(W.why.wonEnd);
     } else {
       const diff = rep.dElectricity > 0 ? fill(W.why.more, { d: rep.dElectricity }) : rep.dElectricity < 0 ? fill(W.why.less, { d: -rep.dElectricity }) : W.why.same;
       why.push(fill(W.why.electricity, { e: mine.electricity, eb: mine.electricity - rep.dElectricity, diff }));
-      why.push(fill(W.why.starts, { s: rep.starts, cold: list(rep.coldSlots) || "-", r: model.restart, sb: rep.bestStarts }));
-      const v = { off: list(rep.switchOff), on: list(rep.switchOn) };
+      why.push(fill(W.why.starts, { s: rep.starts, cold: joinL(rep.coldSlots) || "-", r: model.restart, sb: rep.bestStarts }));
+      const v = { off: joinL(rep.switchOff), on: joinL(rep.switchOn) };
       if (rep.switchOff.length && rep.switchOn.length) why.push(fill(W.why.fix, v));
       else if (rep.switchOff.length) why.push(fill(W.why.fixOff, v));
       else if (rep.switchOn.length) why.push(fill(W.why.fixOn, v));
     }
     const rows = rep.rows.map((r) => {
-      const state = `${r.on ? W.running : W.idle}${r.cold ? `, ${fill(W.rowCold, { r: model.restart })}` : ""}. ${W.tag[r.tag]}.`;
+      const state = `${r.on ? W.running : W.idle}${r.cold ? `${list.sep}${fill(W.rowCold, { r: model.restart })}` : ""}. ${W.tag[r.tag]}.`;
       return h("li", { class: `site-${r.tag}` }, fill(W.row, { n: r.slot, p: r.price, state }));
     });
     const block = h(
@@ -568,6 +576,12 @@ export function createFlow({ root, model = PRESETS.team, text, reduceMotion, fie
     start: (skip) => go(skip ? "play" : "title"),
     setGoal: (line) => {
       coachGoal.textContent = line;
+    },
+    setStep: (n) => {
+      questStep = n;
+      showStep();
+      // the tip ("Happy with it? Press Simulate.") appears only in step 3
+      if (phase === "play") updateCoach(getSlots());
     },
     onSlots: (slots) => {
       if (phase === "play") updateCoach(slots);
