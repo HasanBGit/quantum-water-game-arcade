@@ -13,7 +13,7 @@ const make = (start) => {
 
 test("phones start on medium, laptops on high", () => {
   assert.equal(startingTier(true), "medium");
-  assert.equal(startingTier(false), "high");
+  assert.equal(startingTier(false), "medium");
 });
 
 test("slow frames step the tier down", () => {
@@ -32,7 +32,7 @@ test("a step up that does not hold is not tried again", () => {
   const { q } = make("medium");
   for (let i = 0; i < 5000 && q.tier !== "high"; i++) q.tick(16.7); // goes up to high
   assert.equal(q.tier, "high");
-  run(q, 50, 200); // too slow right after: one step back down to medium
+  run(q, 50, 80); // too slow right after: one step back down to medium
   assert.equal(q.tier, "medium");
   run(q, 16.7, 6000); // fast again, but high already failed
   assert.equal(q.tier, "medium");

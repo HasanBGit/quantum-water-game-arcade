@@ -429,10 +429,10 @@ body[data-mode="overview"] #btn-pov, body[data-phase]:not([data-phase="play"]) #
 
 /* ---- Words panel (glossary) */
 #glossary {
-  position: fixed; top: 76px; left: 0; z-index: 30;
-  width: min(22rem, calc(100vw - 24px)); max-height: calc(100vh - 92px); overflow: auto;
-  padding: 14px; background: var(--panel); border: var(--outline); border-left: 0;
-  border-radius: 0 20px 20px 0; box-shadow: var(--lift);
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 30;
+  width: min(24rem, calc(100vw - 24px)); max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); overflow: auto;
+  padding: 14px; background: var(--panel); border: var(--outline);
+  border-radius: 20px; box-shadow: var(--lift);
 }
 #glossary[hidden] { display: none; }
 #glossary .gl-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
@@ -444,4 +444,3 @@ body[data-mode="overview"] #btn-pov, body[data-phase]:not([data-phase="play"]) #
 #glossary summary { min-height: 44px; display: flex; align-items: center; font-weight: 600; cursor: pointer; }
 #glossary details p { margin: 0 0 8px; font-size: 0.95rem; line-height: 1.45; }
 #glossary .gl-like { color: #4a4f86; padding-bottom: 6px; }
-@media (max-width: 700px) { #glossary { top: 120px; } }

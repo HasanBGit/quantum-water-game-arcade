@@ -7,11 +7,13 @@ export const TIERS = {
   low: { pixelRatio: 1, shadow: 512, shadows: false, seaEvery: 6, trees: 0.5, shrubs: false, treeShadows: false },
 };
 const ORDER = ["high", "medium", "low"];
-export const SLOW_MS = 24; // below about 40 fps: step down
+export const SLOW_MS = 19; // below about 52 fps: step down, so a tier that cannot hold close to 60 is not kept
 export const FAST_MS = 18; // about 55 fps or better: try a step up
 
-export function startingTier(coarse) {
-  return coarse ? "medium" : "high";
+// Everyone starts on medium: a laptop that cannot hold 60 fps on high spends its first seconds janky before it steps
+// down, while a strong one steps up to high after 15 s of fast frames.
+export function startingTier() {
+  return "medium";
 }
 
 export function createQuality({ start, apply }) {
