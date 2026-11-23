@@ -370,7 +370,7 @@ body[data-mode="overview"] #btn-use { display: none; }
   .controls { top: 56px; padding: 4px; gap: 6px; }
   .controls button, .controls select { min-height: 34px; padding: 0 8px; }
   .coach { top: 100px; scale: 0.8; }
-  .coach .why { display: none; }
+  .coach .why { font-size: 0.6875rem; line-height: 1.2; }
   .coach p { margin-top: 4px; }
 }
 

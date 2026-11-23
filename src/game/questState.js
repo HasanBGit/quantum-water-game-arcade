@@ -12,6 +12,9 @@ const NEEDS_GREEDY = new Set(["layla"]); // asking why the obvious plan costs mo
 export function createQuestState(model = PRESETS.team) {
   const greedyP = greedyPlan(model, allPlans(model));
   const done = new Set();
+  const MISS_LIMIT = 2; // this many wrong tries in a row, with no right move between, sends the player back to the tracker
+  let misses = 0;
+  let prev = [0, 0, 0, 0, 0];
   const MAIN = ["greedy", "layla", "beat", "simulate", "result"];
   const OPTIONAL = ["noura", "faisal", "omar", "james"];
 
@@ -39,10 +42,37 @@ export function createQuestState(model = PRESETS.team) {
     },
     /** The slots (1 to 5) the obvious plan switches on. */
     greedySlots: () => greedyP.x.map((v, i) => (v ? i + 1 : 0)).filter(Boolean),
-    talked: (helperId) => HELPERS.includes(helperId) && mark(helperId),
+    talked(helperId) {
+      if (!HELPERS.includes(helperId)) return false;
+      // asking Leen "why" before the obvious plan was tried is a wrong step; the other helpers are always fine
+      if (NEEDS_GREEDY.has(helperId) && !done.has("greedy")) {
+        misses += 1;
+        return false;
+      }
+      return mark(helperId);
+    },
+    /** The open task the player has missed {MISS_LIMIT} times in a row, or null. Only the two plan tasks can be missed. */
+    offTrack: () => (misses >= MISS_LIMIT ? MAIN.find((id) => !done.has(id)) : null),
     slots(slots) {
       const b = billLines(model, slots);
       let changed = false;
+      const open = MAIN.find((id) => !done.has(id));
+      const was = prev;
+      prev = slots.map((v) => (v ? 1 : 0));
+      const flipped = prev.map((v, i) => (v !== was[i] ? i : -1)).filter((i) => i >= 0);
+      if (open === "greedy") {
+        // wrong: a plan slot switched off or an expensive slot switched on; right: the opposite
+        const wrong = flipped.some((i) => (prev[i] ? !greedyP.x[i] : Boolean(greedyP.x[i])));
+        const right = flipped.some((i) => (prev[i] ? Boolean(greedyP.x[i]) : !greedyP.x[i]));
+        if (wrong) misses += 1;
+        else if (right) misses = 0;
+      } else if (open === "layla") {
+        // nothing to judge in the plan while the next step is to talk
+      } else if (open === "beat") {
+        // wrong: a full 3-slot plan that costs the obvious plan's bill or more
+        if (flipped.length && b.chosen === b.required && b.total >= greedyP.total) misses += 1;
+        else if (b.chosen === b.required && b.total < greedyP.total) misses = 0;
+      } else misses = 0;
       if (b.chosen === b.required) {
         if (slots.every((v, i) => Boolean(v) === Boolean(greedyP.x[i]))) changed = mark("greedy") || changed;
         if (b.total < greedyP.total) changed = mark("beat") || changed;
@@ -51,6 +81,9 @@ export function createQuestState(model = PRESETS.team) {
     },
     phase(phase) {
       let changed = false;
+      // pressing Simulate while an earlier step is still open is a wrong step
+      if (phase === "simulate" && !done.has("simulate") && MAIN.find((id) => !done.has(id)) !== "simulate") misses += 1;
+      else if (phase === "play") misses = 0;
       if (phase === "simulate") changed = mark("simulate");
       if (phase === "result") changed = mark("result") || changed;
       return changed;

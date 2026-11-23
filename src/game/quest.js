@@ -42,6 +42,11 @@ export function createQuest({ stage, text, model = PRESETS.team, onComplete = ()
     const current = main.find((x) => !x.done);
     if (!current) return text.complete;
     const line = fill(text.next, { task: current.label });
+    // After 2 wrong tries in a row: say so, point at the tracker, and say exactly what to do
+    if (state.offTrack()) {
+      const fix = current.id === "greedy" ? greedyDetail() : current.id === "layla" ? text.laylaHint : fill(text.beatHint, { greedy });
+      return `${text.offTrack} ${line}. ${fix}`;
+    }
     return current.id === "greedy" ? `${line}. ${greedyDetail()}` : line;
   };
 
@@ -79,18 +84,35 @@ export function createQuest({ stage, text, model = PRESETS.team, onComplete = ()
 
   return {
     /** A helper's conversation reached a topic (not just the greeting). */
-    talked: (helperId) => state.talked(helperId) && render(),
+    talked(helperId) {
+      const wasOff = Boolean(state.offTrack());
+      const ticked = state.talked(helperId);
+      const off = Boolean(state.offTrack());
+      root.classList.toggle("offtrack", off);
+      if (off && !wasOff) root.open = true;
+      if (ticked || off !== wasOff) render();
+    },
     /** The player's slots changed. */
     slots(slots) {
       lastSlots = slots.slice();
       // re-draw on every press while the obvious plan is the open task, so "k of 3" and the wrong-slot note stay current
       const wasGreedy = state.next() === "greedy";
-      if (state.slots(slots) || wasGreedy) render();
+      const wasOff = Boolean(state.offTrack());
+      const ticked = state.slots(slots);
+      const off = Boolean(state.offTrack());
+      if (off && !wasOff) root.open = true; // show the full list so the player can see where they are
+      root.classList.toggle("offtrack", off);
+      if (ticked || wasGreedy || off !== wasOff || off || state.next() === "beat") render();
     },
     /** The game moved to another screen. */
     phase(phase) {
       root.hidden = phase !== "play" && phase !== "around";
-      if (state.phase(phase)) render();
+      const wasOff = Boolean(state.offTrack());
+      const ticked = state.phase(phase);
+      const off = Boolean(state.offTrack());
+      root.classList.toggle("offtrack", off);
+      if (off && !wasOff && phase === "play") root.open = true;
+      if (ticked || off !== wasOff) render();
     },
     /** The line for the current task, e.g. "Next: Press Simulate and watch the search". */
     nextLine,

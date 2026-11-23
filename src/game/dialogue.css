@@ -139,3 +139,5 @@ body[data-mode="overview"] #btn-talk { display: none; }
 .quest li.current::before { background: var(--price); }
 .quest li.optional { font-weight: 500; color: #5a5f93; }
 .quest li em { margin-left: 4px; padding: 0 6px; border-radius: 999px; background: #e8ecff; font-size: 0.75rem; font-style: normal; font-weight: 700; }
+
+.quest.offtrack { outline: 3px solid var(--cost, #D6452B); }

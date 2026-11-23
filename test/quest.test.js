@@ -84,3 +84,37 @@ test("simulating without asking Layla still moves the coach to step 3", () => {
   assert.equal(q.isDone("layla"), false);
   assert.equal(q.step(), 3);
 });
+
+test("two wrong tries in a row send the player back to the open task; a right move clears it", () => {
+  const q = createQuestState(model);
+  q.slots([0, 0, 1, 0, 0]); // slot 3 is not one of the 3 cheapest
+  assert.equal(q.offTrack(), null);
+  q.slots([0, 0, 1, 1, 0]); // slot 4 is not either
+  assert.equal(q.offTrack(), "greedy");
+  q.slots([0, 0, 1, 0, 0]); // switching a wrong slot off is a right move
+  assert.equal(q.offTrack(), null);
+});
+
+test("two full plans that are not cheaper than the obvious plan send the player back to the cheaper-plan task", () => {
+  const q = createQuestState(model);
+  q.slots(GREEDY);
+  q.talked("layla");
+  q.slots([1, 0, 1, 0, 1]); // islands: dearer
+  assert.equal(q.offTrack(), null);
+  q.slots([0, 1, 0, 1, 1]);
+  assert.equal(q.offTrack(), "beat");
+  q.slots(BEST);
+  assert.equal(q.offTrack(), null);
+});
+
+test("asking Leen before the obvious plan, or pressing Simulate too early, counts as wrong steps", () => {
+  const q = createQuestState(model);
+  q.talked("layla");
+  assert.equal(q.offTrack(), null);
+  q.phase("simulate");
+  assert.equal(q.offTrack(), "greedy");
+  q.phase("play");
+  assert.equal(q.offTrack(), null);
+  q.talked("noura"); // optional helpers are never wrong
+  assert.equal(q.offTrack(), null);
+});

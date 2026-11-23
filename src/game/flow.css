@@ -423,7 +423,7 @@ body[data-phase="around"] :is(.bill, .pad, #btn-use, #btn-overview) { display: n
 @media (max-width: 700px) {
   html .coach { padding: 8px 10px 10px 54px; font-size: 0.8125rem; border-radius: 16px; scale: 0.82; }
   html .coach .coachmascot { width: 42px; height: 50px; left: -4px; top: 6px; }
-  html .coach .why { display: none; }
+  html .coach .why { max-width: 9rem; font-size: 0.75rem; line-height: 1.25; }
   html .coach #coach-msg { font-size: 0.8125rem; line-height: 1.3; }
   html .coach p { margin-top: 4px; }
   html .coach .pills { gap: 4px; margin-bottom: 2px; }
