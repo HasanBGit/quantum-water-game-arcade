@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://hasanbgit.github.io/quantum-water-game-arcade/sitemap.xml

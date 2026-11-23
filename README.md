@@ -4,8 +4,10 @@
 
 ![Quantum Water: the plant, the bill panel and the helpers](docs/screenshot.jpg)
 
-A 3D browser game about one question: when should a desalination plant run its pumps to pay the least for electricity?
+A free 3D browser game that teaches **quantum computing** and **Grover's search algorithm** through one question: when should a desalination plant run its pumps to pay the least for electricity?
 You run the plant for a day (exactly 3 of 5 time slots, lowest bill), talk to the helpers, press Simulate to watch a search look for a cheaper plan, then see the result.
+
+**Who it is for:** middle and high school students, teachers, and anyone curious about quantum computing. No install, no maths needed, about 4 minutes. Works on phones and laptops, in English and Arabic. Built with three.js, based on a Qiskit Fall Fest notebook.
 
 Everything quantum is **simulated on a laptop**. The game does not claim a quantum advantage, and says so.
 
