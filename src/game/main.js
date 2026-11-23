@@ -44,6 +44,13 @@ const LANG = pickLang(location.search, savedLang);
 const t = gameStrings(LANG);
 document.documentElement.lang = LANG;
 document.documentElement.dir = LANG === "ar" ? "rtl" : "ltr";
+// The Arabic fonts are only downloaded when the game is in Arabic (English players do not pay for them).
+if (LANG === "ar") {
+  const fonts = document.createElement("link");
+  fonts.rel = "stylesheet";
+  fonts.href = "https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;600;700&family=Readex+Pro:wght@400;500;600&display=swap";
+  document.head.append(fonts);
+}
 const $ = (id) => document.getElementById(id);
 const fill = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]);
 const canvas = $("scene");

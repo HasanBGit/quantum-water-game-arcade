@@ -1,7 +1,11 @@
 /* Arabic: a font stack that has Arabic letters, and right-to-left text. Panels keep their screen positions. */
+/* Two Arabic fonts, both loaded from Google Fonts by main.js: Readex Pro for reading text (it was drawn to be easy to
+   read, which suits students) and Baloo Bhaijaan 2 for titles and buttons (round and friendly, like the English Fredoka). */
 html[lang="ar"] {
-  --font: "Baloo Bhaijaan 2", "Cairo", "Noto Sans Arabic", "SF Arabic", "Geeza Pro", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --font: "Readex Pro", "Cairo", "Noto Sans Arabic", "SF Arabic", "Geeza Pro", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --font-display: "Baloo Bhaijaan 2", "Readex Pro", "Cairo", "Noto Sans Arabic", "SF Arabic", "Geeza Pro", Tahoma, system-ui, sans-serif;
 }
+html[lang="ar"] :is(h1, h2, h3, button, summary, dt, strong, .badge, .opt, .dlg-name, .primary) { font-family: var(--font-display); }
 html[dir="rtl"] body { direction: rtl; }
 html[dir="rtl"] .dlg-line, html[dir="rtl"] .dlg-choice { text-align: right; }
 #lang { max-width: 9rem; }
