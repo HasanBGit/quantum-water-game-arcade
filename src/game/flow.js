@@ -55,7 +55,7 @@ function toast(text) {
   setTimeout(() => el.remove(), 2200);
 }
 
-export function createFlow({ root, model = PRESETS.team, text, list = DEFAULT_LIST, reduceMotion, field, narrow = () => false, getSlots, setSlots, onPhase }) {
+export function createFlow({ openWords, wordsLabel, root, model = PRESETS.team, text, list = DEFAULT_LIST, reduceMotion, field, narrow = () => false, getSlots, setSlots, onPhase }) {
   const plans = allPlans(model);
   const slotsLabel = (x) => joinSlots(chosenSlots(x), list);
 
@@ -205,13 +205,15 @@ export function createFlow({ root, model = PRESETS.team, text, list = DEFAULT_LI
   const nextBtn = h("button", { type: "button", class: "primary" });
   const autoBtn = h("button", { type: "button", "aria-pressed": "false" }, S.auto);
   const skipBtn = h("button", { type: "button", class: "quiet" }, S.skip);
+  const wordsBtn = openWords ? h("button", { type: "button", class: "quiet" }, `? ${wordsLabel}`) : null;
+  wordsBtn?.addEventListener("click", () => openWords("quantum"));
 
   section(
     "simulate",
     "simhud",
     h("div", { class: "simtop" }, h("h2", { id: "sim-title", tabindex: "-1" }, S.title), partTag, stepList, caption, why, falls),
     h("dl", { class: "chips" }, cBar.el, cCheaper.el, cStep.el, cChance.el, cClerk.el),
-    h("div", { class: "row simrow" }, backBtn2, nextBtn, autoBtn, skipBtn),
+    h("div", { class: "row simrow" }, backBtn2, nextBtn, autoBtn, skipBtn, wordsBtn),
   );
 
   // simulation state

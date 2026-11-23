@@ -31,6 +31,7 @@ import { createDialogue } from "./dialogue.js";
 import { createQuest } from "./quest.js";
 import { DEMO, dialogueVars } from "./scripts.js";
 import { cheapPeople } from "./perf.js";
+import { createGlossary } from "./glossary.js";
 
 const savedLang = (() => {
   try {
@@ -119,6 +120,8 @@ function optionRow(select, label) {
 }
 optionRow($("quality"), t.quality.label);
 optionRow(langSelect, t.language);
+
+const glossary = createGlossary({ text: t, button: $("btn-words") });
 
 // Settings: one button opens a panel with the view, sound, quality and language controls.
 const uiSound = createUiSound();
@@ -662,6 +665,8 @@ async function start() {
 
   // The guided flow: intro, coach, Simulate, Result. ?skip opens straight on the plant (for the automated checks).
   flow = createFlow({
+    openWords: glossary.open,
+    wordsLabel: t.glossary.button,
     root: $("flow"),
     text: t.flow,
     list: t.list,

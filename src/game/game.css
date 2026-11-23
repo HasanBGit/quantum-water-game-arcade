@@ -425,3 +425,22 @@ body[data-mode="overview"] #btn-pov, body[data-phase]:not([data-phase="play"]) #
 
 /* the arrow pad keeps its physical layout in right-to-left (Arabic): the left arrow stays on the left */
 .pad { direction: ltr; }
+
+/* ---- Words panel (glossary) */
+#glossary {
+  position: fixed; top: 76px; left: 0; z-index: 30;
+  width: min(22rem, calc(100vw - 24px)); max-height: calc(100vh - 92px); overflow: auto;
+  padding: 14px; background: var(--panel); border: var(--outline); border-left: 0;
+  border-radius: 0 20px 20px 0; box-shadow: var(--lift);
+}
+#glossary[hidden] { display: none; }
+#glossary .gl-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+#glossary h2 { margin: 0; font-size: 1.25rem; }
+#glossary .gl-intro { margin: 6px 0 10px; font-size: 0.9rem; }
+#glossary .gl-list { display: grid; gap: 6px; }
+#glossary details { border: 3px solid var(--navy); border-radius: 14px; background: #fff; padding: 0 12px; }
+#glossary details[open] { background: #fff7d6; }
+#glossary summary { min-height: 44px; display: flex; align-items: center; font-weight: 600; cursor: pointer; }
+#glossary details p { margin: 0 0 8px; font-size: 0.95rem; line-height: 1.45; }
+#glossary .gl-like { color: #4a4f86; padding-bottom: 6px; }
+@media (max-width: 700px) { #glossary { top: 120px; } }
