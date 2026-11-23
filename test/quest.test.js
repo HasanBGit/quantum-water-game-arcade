@@ -107,7 +107,7 @@ test("two full plans that are not cheaper than the obvious plan send the player 
   assert.equal(q.offTrack(), null);
 });
 
-test("asking Leen before the obvious plan, or pressing Simulate too early, counts as wrong steps", () => {
+test("asking Lina before the obvious plan, or pressing Simulate too early, counts as wrong steps", () => {
   const q = createQuestState(model);
   q.talked("layla");
   assert.equal(q.offTrack(), null);

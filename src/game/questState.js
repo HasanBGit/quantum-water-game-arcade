@@ -44,7 +44,7 @@ export function createQuestState(model = PRESETS.team) {
     greedySlots: () => greedyP.x.map((v, i) => (v ? i + 1 : 0)).filter(Boolean),
     talked(helperId) {
       if (!HELPERS.includes(helperId)) return false;
-      // asking Leen "why" before the obvious plan was tried is a wrong step; the other helpers are always fine
+      // asking Lina "why" before the obvious plan was tried is a wrong step; the other helpers are always fine
       if (NEEDS_GREEDY.has(helperId) && !done.has("greedy")) {
         misses += 1;
         return false;

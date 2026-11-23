@@ -344,7 +344,7 @@ async function main() {
     const lp = await b.evaluate("(() => { const s = window.__game.helperScreenPos('layla'); return s; })()");
     const vp2 = await b.evaluate("[window.innerWidth, window.innerHeight]");
     if (!lp || lp.x < 0 || lp.y < 0 || lp.x > vp2[0] || lp.y > vp2[1]) {
-      record("talk-click", "Clicking a helper walks to her and starts talking", "FAIL", `could not aim at Leen (screen position ${JSON.stringify(lp)})`);
+      record("talk-click", "Clicking a helper walks to her and starts talking", "FAIL", `could not aim at Lina (screen position ${JSON.stringify(lp)})`);
     } else {
       const underClick = await b.evaluate(`(() => { const e = document.elementFromPoint(${lp.x}, ${lp.y}); return e ? e.tagName + (e.id ? "#" + e.id : "") + (e.className ? "." + String(e.className).split(" ")[0] : "") : "nothing"; })()`);
     await b.send("Input.dispatchMouseEvent", { type: "mousePressed", x: lp.x, y: lp.y, button: "left", buttons: 1, clickCount: 1 });
@@ -360,7 +360,7 @@ async function main() {
         return;
       }
       const clickInfo = await b.evaluate("JSON.stringify(window.__game.lastClick)");
-    record("talk-click", "Clicking a helper walks to her and starts talking", talked && talked.dialogue.who === "layla" ? "PASS" : "FAIL", talked ? `conversation with ${talked.dialogue.who}` : `no conversation started; aimed at pixel ${Math.round(lp.x)},${Math.round(lp.y)}, element there: ${underClick}; last click: ${clickInfo}; walking to goal: ${st.walkingToGoal}; operator at ${st.player.x.toFixed(1)},${st.player.z.toFixed(1)}; Leen at ${JSON.stringify(st.npcs.people.find((x) => x.id === "layla"))}`);
+    record("talk-click", "Clicking a helper walks to her and starts talking", talked && talked.dialogue.who === "layla" ? "PASS" : "FAIL", talked ? `conversation with ${talked.dialogue.who}` : `no conversation started; aimed at pixel ${Math.round(lp.x)},${Math.round(lp.y)}, element there: ${underClick}; last click: ${clickInfo}; walking to goal: ${st.walkingToGoal}; operator at ${st.player.x.toFixed(1)},${st.player.z.toFixed(1)}; Lina at ${JSON.stringify(st.npcs.people.find((x) => x.id === "layla"))}`);
       await tap("Escape");
       await waitFor(async () => (await state()).dialogue.open === false, 20000);
     }

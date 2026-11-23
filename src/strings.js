@@ -263,7 +263,7 @@ export const STRINGS = {
             "Slot {cheapest} is the cheapest, at {pmin}. A good place to start.",
             "Cheap slots are not the whole story. Watch the bill at the top right.",
           ] },
-          { id: "layla", name: "Leen", role: "Restarts", color: "#1f9e8f", lines: [
+          { id: "layla", name: "Lina", role: "Restarts", color: "#1f9e8f", lines: [
             "Every time a pump starts from cold, the bill goes up by {restart}.",
             "Slots that run back to back start only once. Neighbours are cheaper than islands.",
             "A pump that shakes just restarted. That shake costs {restart}.",
@@ -303,7 +303,7 @@ export const STRINGS = {
             ] },
             job: { say: "Run the pumps in exactly 3 of the 5 time slots, for the lowest total bill. The bill adds each slot's price, adds {restart} every time a pump starts from cold, and adds a penalty if you use more or fewer than 3 slots.", next: "hub" },
             controls: { say: "Walk with the arrow keys or W A S D. At a control post press E, or tap its slot on the bill. A pump that shakes has just started from cold.", next: "hub" },
-            friends: { say: "Bushra knows the prices. Leen knows about restarts. Mohammed explains the search. Hassan knows how big this gets. James explains the quantum part, and he is honest about it.", next: "hub" },
+            friends: { say: "Bushra knows the prices. Lina knows about restarts. Mohammed explains the search. Hassan knows how big this gets. James explains the quantum part, and he is honest about it.", next: "hub" },
           } },
           noura: { start: "hub", nodes: {
             hub: { say: "I follow the prices. Slot {cheapest} is the cheapest, at {pmin}. Slot {priciest} is the dearest, at {pmax}. What would you like to ask?", choices: [
@@ -383,12 +383,12 @@ export const STRINGS = {
         sep: ", ",
         greedyHint: "Switch on slots {list}. {k} of 3 right so far.",
         offTrack: "Not quite. Check the Quest list.",
-        laylaHint: "Walk to Leen (the arrow shows where) and ask why the obvious plan costs more.",
+        laylaHint: "Walk to Lina (the arrow shows where) and ask why the obvious plan costs more.",
         beatHint: "A plan that costs {greedy} or more does not count. Switch slots so that your 3 slots sit next to each other, which means fewer restarts.",
         greedyWrong: "Slot {n} costs {p}. That is not one of the 3 cheapest, so switch it off.",
         tasks: {
           noura: "Talk to Bushra about prices",
-          layla: "Ask Leen why the obvious plan costs more",
+          layla: "Ask Lina why the obvious plan costs more",
           faisal: "Talk to Mohammed about the search",
           omar: "Talk to Hassan about how big this gets",
           james: "Talk to James about the quantum part",
