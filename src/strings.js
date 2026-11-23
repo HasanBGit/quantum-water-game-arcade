@@ -193,7 +193,7 @@ export const STRINGS = {
           learn: [
             "The problem: choose which 3 of 5 time slots run, at the lowest bill.",
             "Why it gets hard: 5 slots give 32 plans. 24 hours for 10 trains give 2^240 plans.",
-            "What the quantum search does: mark every plan cheaper than your best, boost the marked ones, measure, repeat with a lower bar.",
+            "What the quantum search does: it marks the plans cheaper than your best, boosts them, and measures. Then it repeats with a lower bar.",
             "How real it is today: only a simulation on a laptop, and a plain loop over 32 plans is faster.",
           ],
           honestTitle: "What this toy does not show",
@@ -253,34 +253,34 @@ export const STRINGS = {
       npcs: {
         hint: "Walk up to a helper for a clue.",
         people: [
-          { id: "maryam", name: "Maryam", role: "Guide", color: "#ff5d73", lines: [
+          { id: "maryam", name: "Fay", role: "Guide", color: "#ff5d73", lines: [
             "Welcome! Switch on exactly 3 of the 5 time slots. You have {on} on now.",
             "Each coloured coin is the price of a slot. Press E at a control post to switch it.",
             "Your goal: the lowest total bill. Meet my friends along the walkway, they all have clues.",
           ] },
-          { id: "noura", name: "Noura", role: "Prices", color: "#8a5cff", lines: [
+          { id: "noura", name: "Bushra", role: "Prices", color: "#8a5cff", lines: [
             "Slot {priciest} is the priciest of the day, at {pmax}. Think twice before using it.",
             "Slot {cheapest} is the cheapest, at {pmin}. A good place to start.",
             "Cheap slots are not the whole story. Watch the bill at the top right.",
           ] },
-          { id: "layla", name: "Layla", role: "Restarts", color: "#1f9e8f", lines: [
+          { id: "layla", name: "Leen", role: "Restarts", color: "#1f9e8f", lines: [
             "Every time a pump starts from cold, the bill goes up by {restart}.",
             "Slots that run back to back start only once. Neighbours are cheaper than islands.",
             "A pump that shakes just restarted. That shake costs {restart}.",
           ] },
-          { id: "faisal", name: "Faisal", role: "Engineer", color: "#3b8fc4", lines: [
+          { id: "faisal", name: "Mohammed", role: "Engineer", color: "#3b8fc4", lines: [
             "The three cheapest slots are {cheap}. Are they next to each other?",
             "Try the obvious plan first, then swap one slot and compare the bills.",
             "If your bill goes down, you are getting warmer. If it goes up, swap back.",
           ] },
-          { id: "omar", name: "Omar", role: "Planner", color: "#ff9f1c", lines: [
+          { id: "omar", name: "Hassan", role: "Planner", color: "#ff9f1c", lines: [
             "Count the starts, not just the prices. One block of three slots starts only once.",
             "With 5 slots there are only 32 plans. With 24 hours and 10 trains, there are 2^240.",
             "Found a cheap plan? Press Simulate and see if anything beats it.",
           ] },
           { id: "james", name: "James", role: "Quantum", color: "#55a845", lines: [
             "After you press Simulate, a search marks every plan cheaper than yours.",
-            "Grover's search boosts the marked plans, then measures. It is all simulated here.",
+            "The quantum search boosts the marked plans, then measures. It is all simulated here.",
             "Honest note: for 32 plans, a plain loop is faster. The toy just shows the idea.",
           ] },
         ],
@@ -295,7 +295,7 @@ export const STRINGS = {
         },
         scripts: {
           maryam: { start: "hub", nodes: {
-            hub: { say: "Hello. I am Maryam, the guide. What would you like to know?", choices: [
+            hub: { say: "Hello. I am Fay, the guide. What would you like to know?", choices: [
               { label: "What is my job?", next: "job" },
               { label: "How do the controls work?", next: "controls" },
               { label: "Who else can I talk to?", next: "friends" },
@@ -303,7 +303,7 @@ export const STRINGS = {
             ] },
             job: { say: "Run the pumps in exactly 3 of the 5 time slots, for the lowest total bill. The bill adds each slot's price, adds {restart} every time a pump starts from cold, and adds a penalty if you use more or fewer than 3 slots.", next: "hub" },
             controls: { say: "Walk with the arrow keys or W A S D. At a control post press E, or tap its slot on the bill. A pump that shakes has just started from cold.", next: "hub" },
-            friends: { say: "Noura knows the prices. Layla knows about restarts. Faisal explains the search. Omar knows how big this gets. James explains the quantum part, and he is honest about it.", next: "hub" },
+            friends: { say: "Bushra knows the prices. Leen knows about restarts. Mohammed explains the search. Hassan knows how big this gets. James explains the quantum part, and he is honest about it.", next: "hub" },
           } },
           noura: { start: "hub", nodes: {
             hub: { say: "I follow the prices. Slot {cheapest} is the cheapest, at {pmin}. Slot {priciest} is the dearest, at {pmax}. What would you like to ask?", choices: [
@@ -384,10 +384,10 @@ export const STRINGS = {
         greedyHint: "Switch on slots {list}. {k} of 3 right so far.",
         greedyWrong: "Slot {n} costs {p}. That is not one of the 3 cheapest, so switch it off.",
         tasks: {
-          noura: "Talk to Noura about prices",
-          layla: "Ask Layla why the obvious plan costs more",
-          faisal: "Talk to Faisal about the search",
-          omar: "Talk to Omar about how big this gets",
+          noura: "Talk to Bushra about prices",
+          layla: "Ask Leen why the obvious plan costs more",
+          faisal: "Talk to Mohammed about the search",
+          omar: "Talk to Hassan about how big this gets",
           james: "Talk to James about the quantum part",
           greedy: "Try the obvious plan: switch on the 3 cheapest slots",
           beat: "Now find a cheaper plan (a bill under {greedy})",
@@ -404,7 +404,7 @@ export const STRINGS = {
         terms: [
           { id: "slot", term: "Slot", mean: "One block of the day. Each slot has its own electricity price.", like: "One row in a school timetable." },
           { id: "plan", term: "Plan", mean: "One choice of which slots run and which stay off. With 5 slots there are 32 plans.", like: "One way to fill in a yes-or-no checklist." },
-          { id: "bill", term: "Bill", mean: "What a plan costs: the prices of the slots you use, plus restart costs, plus a penalty if you do not use exactly 3.", like: "A shop receipt." },
+          { id: "bill", term: "Bill", mean: "What a plan costs: slot prices, plus restart costs, plus a penalty if you do not use exactly 3 slots.", like: "A shop receipt." },
           { id: "cold", term: "Cold start", mean: "A pump starting after it was off. It costs extra. A pump that keeps running does not start again.", like: "A car uses more fuel to start than to keep driving." },
           { id: "bar", term: "The bar", mean: "The bill to beat. The search looks for plans cheaper than the bar. Each time it finds one, the bar moves down.", like: "The bar in high jump, set lower each round." },
           { id: "clerk", term: "Normal computer (clerk)", mean: "A normal computer checks plans one by one. If nothing tells it where the good plans are, it must check them all.", like: "Reading a phone book in random order to find one number." },
