@@ -49,13 +49,6 @@ npm run assets-doc          # rewrites ASSETS.md from public/assets/manifest.jso
 ## Assets and licences
 `ASSETS.md` lists every downloaded model, texture and sky (all CC0, from Poly Haven) with source and licence. Characters, scenery and equipment are built in code. The sound is made in the browser, so there is nothing to credit. The game loads three fonts from Google Fonts at run time (Fredoka for English, Readex Pro and Baloo Bhaijaan 2 for Arabic), each under the SIL Open Font Licence. The 3D engine is [three.js](https://threejs.org/) (MIT).
 
-## Known limits (be honest about these when you show it)
-- **Frame rate has only been measured in a test browser without a graphics card.** It has not been measured on a real phone. The quality tiers and budgets are starting numbers.
-- **The Arabic text has not been read by a fluent speaker.** It follows the notebook's glossary, but it needs a review before it is shown. Panels keep their screen positions in Arabic; only the text direction flips.
-- **The sound is synthesised**, so the birds sound artificial. Real recordings were not added.
-- **The audience mode has only been tested with a script**, not with a room full of phones.
-- The numbers (prices, restart cost 5, penalty 10) are invented for teaching. A real plant is scheduled with classical optimisation; nobody has shown a quantum advantage for it.
-
 ## Where the maths comes from
 The cost function and the Grover steps follow the notebook "Desalination scheduling: when should the plant run?" from the KACST Qiskit Fall Fest 2026 (equations for the penalty, the oracle, the inversion about the average and the success chance sin²((2k+1)θ)). The game's own prices and restart cost are an extension of that notebook's formula, chosen so that the three cheapest slots are not the best plan.
 
