@@ -2,7 +2,27 @@
   "name": "quantum-water-game",
   "private": true,
   "version": "0.1.0",
+  "description": "A 3D browser game that teaches Grover adaptive search through desalination pump scheduling. Everything quantum is simulated.",
+  "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HasanBGit/quantum-water-game-arcade.git"
+  },
+  "homepage": "https://hasanbgit.github.io/quantum-water-game-arcade/",
+  "bugs": {
+    "url": "https://github.com/HasanBGit/quantum-water-game-arcade/issues"
+  },
+  "keywords": [
+    "quantum-computing",
+    "qiskit",
+    "grover",
+    "threejs",
+    "education",
+    "game",
+    "desalination",
+    "arabic"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",

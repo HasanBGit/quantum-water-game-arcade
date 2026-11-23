@@ -1,5 +1,9 @@
 # Quantum Water
 
+[**Play it in your browser**](https://hasanbgit.github.io/quantum-water-game-arcade/) · MIT licence · English and Arabic
+
+![Quantum Water: the plant, the bill panel and the helpers](docs/screenshot.jpg)
+
 A 3D browser game about one question: when should a desalination plant run its pumps to pay the least for electricity?
 You run the plant for a day (exactly 3 of 5 time slots, lowest bill), talk to the helpers, press Simulate to watch a search look for a cheaper plan, then see the result.
 
@@ -43,7 +47,7 @@ npm run assets-doc          # rewrites ASSETS.md from public/assets/manifest.jso
 `verify:snapshot` picks free ports each run, so it can run while someone else is editing or running their own checks. It writes screenshots to `verify-output/`.
 
 ## Assets and licences
-`ASSETS.md` lists every downloaded model, texture and sky (all CC0, from Poly Haven) with source and licence. Trees come from EZ-Tree (MIT). Characters and equipment are built in code. The sound is made in the browser, so there is nothing to credit.
+`ASSETS.md` lists every downloaded model, texture and sky (all CC0, from Poly Haven) with source and licence. Characters, scenery and equipment are built in code. The sound is made in the browser, so there is nothing to credit. The game loads three fonts from Google Fonts at run time (Fredoka for English, Readex Pro and Baloo Bhaijaan 2 for Arabic), each under the SIL Open Font Licence. The 3D engine is [three.js](https://threejs.org/) (MIT).
 
 ## Known limits (be honest about these when you show it)
 - **Frame rate has only been measured in a test browser without a graphics card.** It has not been measured on a real phone. The quality tiers and budgets are starting numbers.
@@ -52,5 +56,11 @@ npm run assets-doc          # rewrites ASSETS.md from public/assets/manifest.jso
 - **The audience mode has only been tested with a script**, not with a room full of phones.
 - The numbers (prices, restart cost 5, penalty 10) are invented for teaching. A real plant is scheduled with classical optimisation; nobody has shown a quantum advantage for it.
 
-## Working with other sessions
-Several sessions have worked on this project. `../COORDINATION.md` says who owns which files and the ground rules.
+## Where the maths comes from
+The cost function and the Grover steps follow the notebook "Desalination scheduling: when should the plant run?" from the KACST Qiskit Fall Fest 2026 (equations for the penalty, the oracle, the inversion about the average and the success chance sin²((2k+1)θ)). The game's own prices and restart cost are an extension of that notebook's formula, chosen so that the three cheapest slots are not the best plan.
+
+## Contributing
+Contributions are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). Start with `npm test`.
+
+## Licence
+MIT, see [LICENSE](LICENSE). Third-party assets keep their own licences, listed in `ASSETS.md`.
