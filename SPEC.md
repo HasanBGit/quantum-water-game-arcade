@@ -17,7 +17,7 @@ The four answers the game must give, in order (from notebook section 5):
 ## 2. References
 - Notebook `09_use_desalination_grover.ipynb`: problem, equations (1)-(8), toy numbers, honesty text (section 4), audience and four questions (section 5).
 - Team document: cost function and tariff c = [2, 4, 7, 6, 3], S = 5, P = 10; optimum {1,2,3} = 18, greedy {1,2,5} = 19 (recomputed and checked).
-- Desalination (Wikipedia, read in part): reverse osmosis uses 3-5.5 kWh per cubic metre; seawater average about 3 kWh per cubic metre (2018); Ras Al-Khair makes 1,401,000 cubic metres per day. These are the only real-plant figures allowed on screen.
+- Desalination (Wikipedia, read in part): reverse osmosis uses 3-5.5 kWh per cubic metre; seawater average about 3 kWh per cubic metre (2018); Ras Al-Khair makes about 1.025 million cubic metres per day (Saudi Gazette; the earlier figure 1,401,000 was checked on 2026-11-23 and no source supports it, so it was removed). These are the only real-plant figures allowed on screen.
 - Research notes are in the plan file `okay-i-see-that-crispy-popcorn.md`.
 
 ## 3. Core loop and states

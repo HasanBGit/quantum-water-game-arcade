@@ -86,7 +86,7 @@ export const STRINGS = {
         steps: ["Choose", "Improve", "Simulate"],
         intro: {
           title: "Quantum Water",
-          lead: "A plant that turns sea water into drinking water needs pumps, and pumps use a lot of electricity. The price of electricity changes during the day. Your job: pick the cheapest times to run the pumps.",
+          lead: "A plant that turns sea water into drinking water needs pumps, and pumps use a lot of electricity. The price of electricity changes during the day. Your job: pick the cheapest times to run the pumps. In Saudi Arabia, a plant such as Ras Al-Khair makes about a million cubic metres of fresh water a day, so when its pumps run is worth real money.",
           howTitle: "About 4 minutes",
           how: [
             { name: "Play", time: "about 2 min", text: "The day has 5 time slots, each with its own price. Switch on exactly 3. Turning a pump on again after a pause costs extra." },
@@ -197,7 +197,7 @@ export const STRINGS = {
             "How real it is today: only a simulation on a laptop, and a plain loop over 32 plans is faster.",
           ],
           honestTitle: "What this toy does not show",
-          honest: "With only 32 plans, a normal computer checks them all in a blink. The quantum search needed 12 pretend qubits and many rounds. A real plant is much bigger, and today it is planned with normal computer programs. The quantum search only saves a square-root amount of work, and it needs quantum computers far better than the ones we have now. So this game does not prove that quantum computers win.",
+          honest: "With only 32 plans, a normal computer checks them all in a blink. In the notebook, the quantum search needed 12 simulated qubits (5 for the plans, 7 to hold the cost) and many rounds. A real plant is much bigger, and today it is planned with normal computer programs. The quantum search only saves a square-root amount of work, and it needs quantum computers far better than the ones we have now. So this game does not prove that quantum computers win.",
           zoomTitle: "Zoom out: how many plans?",
           zoomRows: [
             { label: "5 slots (this game)", slots: 5 },
@@ -217,7 +217,7 @@ export const STRINGS = {
             "\u201cThe tanks show how a quantum computer looks inside.\u201d They are a picture. A level shows how likely a plan is to be measured. The real thing is built from qubits, tiny quantum switches.",
           ],
           realTitle: "Real plants",
-          real: "The restart cost of 5 is made up for this game. Real plants do have start-up delays, and a storage tank lets a plant pause when power is dear (Rao et al., 2024).",
+          real: "The restart cost of 5 is made up for this game. Real plants do have start-up delays, and a storage tank lets a plant pause when power is dear (Rao et al., 2024). Why it matters in Saudi Arabia: a plant such as Ras Al-Khair makes about a million cubic metres of fresh water a day, and electricity is a large share of the running cost of reverse osmosis (45% or more, according to one pump maker).",
           site: {
             title: "Site report",
             wonHead: "Your plan is the cheapest of all 32.",
@@ -366,7 +366,7 @@ export const STRINGS = {
               { label: "Will it help one day?", next: "future" },
               { label: "Goodbye.", end: true },
             ] },
-            faster: { say: "Not for {n_plans} plans. A plain loop takes microseconds. The quantum search needs about 12 simulated qubits and several rounds.", next: "hub" },
+            faster: { say: "Not for {n_plans} plans. A plain loop takes microseconds. In the notebook, the quantum search needed 12 simulated qubits and several rounds.", next: "hub" },
             real: { say: "No. Everything here is maths running on a laptop. This game never claims a quantum advantage.", next: "hub" },
             future: { say: "The quantum search needs about the square root of the number of plans. For {b240} plans that is still {s240} steps.", next: "future2" },
             future2: { say: "That is still far too many. It also needs quantum computers much better than any that exist today. Nobody has shown a quantum advantage on this problem (a real win for quantum).", next: "hub" },
@@ -382,6 +382,9 @@ export const STRINGS = {
         slotPrice: "{n} (price {p})",
         sep: ", ",
         greedyHint: "Switch on slots {list}. {k} of 3 right so far.",
+        offTrack: "Not quite. Check the Quest list.",
+        laylaHint: "Walk to Leen (the arrow shows where) and ask why the obvious plan costs more.",
+        beatHint: "A plan that costs {greedy} or more does not count. Switch slots so that your 3 slots sit next to each other, which means fewer restarts.",
         greedyWrong: "Slot {n} costs {p}. That is not one of the 3 cheapest, so switch it off.",
         tasks: {
           noura: "Talk to Bushra about prices",

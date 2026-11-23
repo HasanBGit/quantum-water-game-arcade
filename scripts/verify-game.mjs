@@ -171,7 +171,7 @@ async function openGame(url, { reducedMotion = false, width = 1440, height = 900
   return { b, st, ready };
 }
 
-/** Teleport next to Noura and press E. Returns the state once the conversation is open (or null). */
+/** Teleport next to Bushra and press E. Returns the state once the conversation is open (or null). */
 async function startTalking(b, st, nameRegex) {
   const noura = (await st()).npcs.people.find((x) => x.id === "noura");
   await b.evaluate(`window.__game.teleport(${noura.x}, ${noura.z + 1})`);
@@ -191,7 +191,7 @@ async function accessibilityChecks() {
     const { b, st, ready } = await openGame(URL, { reducedMotion: true });
     if (!ready) record("reduced-motion", "With reduced motion the conversation text appears at once", "FAIL", "the game did not start");
     else {
-      const opened = await startTalking(b, st, /Noura/);
+      const opened = await startTalking(b, st, /Bushra/);
       const d = opened ? opened.dialogue : null;
       const motionQuery = await b.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches");
       record("reduced-motion", "With reduced motion on, a conversation shows its whole line at once (no typing)", motionQuery && d && d.typing === false && d.shown === d.text && d.text.length > 0 ? "PASS" : "FAIL", `media query matches=${motionQuery}; ${d ? `${d.shown.length} of ${d.text.length} characters shown immediately, typing=${d.typing}` : "no conversation"}`);
@@ -203,7 +203,7 @@ async function accessibilityChecks() {
     const { b, st, ready } = await openGame(URL, { width: 320, height: 640, mobile: true });
     if (!ready) record("narrow-320", "On a 320 px screen the conversation fits", "FAIL", "the game did not start");
     else {
-      const opened = await startTalking(b, st, /Talk to Noura|Noura/);
+      const opened = await startTalking(b, st, /Talk to Bushra|Bushra/);
       await waitUntil(async () => (await st()).dialogue.choices > 0, 60000);
       const fit = await b.evaluate(`(() => {
         const r = document.getElementById("dialogue").getBoundingClientRect();
@@ -277,9 +277,9 @@ async function main() {
     const people = (await state()).npcs.people;
     const noura = people.find((x) => x.id === "noura");
     await b.evaluate(`window.__game.teleport(${noura.x}, ${noura.z + 1})`);
-    await waitFor(async () => /Noura/.test((await state()).talkButton.text), 90000); // the player starts next to Maryam, so wait for the teleport to take effect
+    await waitFor(async () => /Bushra/.test((await state()).talkButton.text), 90000); // the player starts next to Fay, so wait for the teleport to take effect
     const tb = (await state()).talkButton;
-    record("talk-button", "Standing near a helper shows a 'Talk to Noura' button", !tb.hidden && /Talk to Noura/.test(tb.text) ? "PASS" : "FAIL", JSON.stringify(tb));
+    record("talk-button", "Standing near a helper shows a 'Talk to Bushra' button", !tb.hidden && /Talk to Bushra/.test(tb.text) ? "PASS" : "FAIL", JSON.stringify(tb));
     await tap("KeyE");
     const opened = await waitFor(async () => (await state()).dialogue.open && (await state()), 30000);
     record("talk-open", "Pressing E next to a helper opens a conversation with her", opened && opened.dialogue.who === "noura" ? "PASS" : "FAIL", opened ? JSON.stringify({ who: opened.dialogue.who, node: opened.dialogue.node }) : "did not open");
@@ -313,7 +313,7 @@ async function main() {
     await waitFor(async () => (await state()).dialogue.choices === 3, 30000);
     await keyDown("Digit1");
     await keyUp("Digit1");
-    // Move on until Noura switches the slots on for us.
+    // Move on until Bushra switches the slots on for us.
     let shown = null;
     for (let i = 0; i < 12 && !shown; i++) {
       await tap("KeyE");
@@ -323,8 +323,8 @@ async function main() {
       const st = await state();
       if (st.slots.join("") === "11001") shown = st;
     }
-    record("talk-effect", "A reply changes the plant: Noura switches on the 3 cheapest slots and the bill shows 19", shown && shown.bill.total === 19 && shown.predictions.includes("yes") ? "PASS" : "FAIL", shown ? `slots ${shown.slots.join("")}, bill ${shown.bill.total}, guess recorded: ${shown.predictions.join(",")}` : `slots never changed (reached node ${JSON.stringify((await state()).dialogue)})`);
-    record("talk-quest", `Talking marks the quest: Noura done, 'try the obvious plan' done, and 'find a cheaper plan' done only if one was really made earlier in this run (${cheaperPlanMadeEarlier ? "one was" : "none was"}); progress counts in any order`, shown && shown.quest.done.includes("noura") && shown.quest.done.includes("greedy") && shown.quest.done.includes("beat") === cheaperPlanMadeEarlier ? "PASS" : "FAIL", shown ? JSON.stringify(shown.quest.done) : "no state");
+    record("talk-effect", "A reply changes the plant: Bushra switches on the 3 cheapest slots and the bill shows 19", shown && shown.bill.total === 19 && shown.predictions.includes("yes") ? "PASS" : "FAIL", shown ? `slots ${shown.slots.join("")}, bill ${shown.bill.total}, guess recorded: ${shown.predictions.join(",")}` : `slots never changed (reached node ${JSON.stringify((await state()).dialogue)})`);
+    record("talk-quest", `Talking marks the quest: Bushra done, 'try the obvious plan' done, and 'find a cheaper plan' done only if one was really made earlier in this run (${cheaperPlanMadeEarlier ? "one was" : "none was"}); progress counts in any order`, shown && shown.quest.done.includes("noura") && shown.quest.done.includes("greedy") && shown.quest.done.includes("beat") === cheaperPlanMadeEarlier ? "PASS" : "FAIL", shown ? JSON.stringify(shown.quest.done) : "no state");
     await tap("Escape");
     const closed = await waitFor(async () => (await state()).dialogue.open === false && (await state()), 20000);
     const talkingFlag = await b.evaluate("document.body.dataset.talking === undefined");
@@ -344,7 +344,7 @@ async function main() {
     const lp = await b.evaluate("(() => { const s = window.__game.helperScreenPos('layla'); return s; })()");
     const vp2 = await b.evaluate("[window.innerWidth, window.innerHeight]");
     if (!lp || lp.x < 0 || lp.y < 0 || lp.x > vp2[0] || lp.y > vp2[1]) {
-      record("talk-click", "Clicking a helper walks to her and starts talking", "FAIL", `could not aim at Layla (screen position ${JSON.stringify(lp)})`);
+      record("talk-click", "Clicking a helper walks to her and starts talking", "FAIL", `could not aim at Leen (screen position ${JSON.stringify(lp)})`);
     } else {
       const underClick = await b.evaluate(`(() => { const e = document.elementFromPoint(${lp.x}, ${lp.y}); return e ? e.tagName + (e.id ? "#" + e.id : "") + (e.className ? "." + String(e.className).split(" ")[0] : "") : "nothing"; })()`);
     await b.send("Input.dispatchMouseEvent", { type: "mousePressed", x: lp.x, y: lp.y, button: "left", buttons: 1, clickCount: 1 });
@@ -360,7 +360,7 @@ async function main() {
         return;
       }
       const clickInfo = await b.evaluate("JSON.stringify(window.__game.lastClick)");
-    record("talk-click", "Clicking a helper walks to her and starts talking", talked && talked.dialogue.who === "layla" ? "PASS" : "FAIL", talked ? `conversation with ${talked.dialogue.who}` : `no conversation started; aimed at pixel ${Math.round(lp.x)},${Math.round(lp.y)}, element there: ${underClick}; last click: ${clickInfo}; walking to goal: ${st.walkingToGoal}; operator at ${st.player.x.toFixed(1)},${st.player.z.toFixed(1)}; Layla at ${JSON.stringify(st.npcs.people.find((x) => x.id === "layla"))}`);
+    record("talk-click", "Clicking a helper walks to her and starts talking", talked && talked.dialogue.who === "layla" ? "PASS" : "FAIL", talked ? `conversation with ${talked.dialogue.who}` : `no conversation started; aimed at pixel ${Math.round(lp.x)},${Math.round(lp.y)}, element there: ${underClick}; last click: ${clickInfo}; walking to goal: ${st.walkingToGoal}; operator at ${st.player.x.toFixed(1)},${st.player.z.toFixed(1)}; Leen at ${JSON.stringify(st.npcs.people.find((x) => x.id === "layla"))}`);
       await tap("Escape");
       await waitFor(async () => (await state()).dialogue.open === false, 20000);
     }
