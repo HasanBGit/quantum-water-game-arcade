@@ -87,19 +87,19 @@ function checkTex(hex) {
   const col = "#" + new THREE.Color(hex).getHexString();
   g.fillStyle = "#f6f2ea";
   g.fillRect(0, 0, 128, 128);
-  g.fillStyle = col;
-  for (const p of [0, 64]) {
-    g.fillRect(p, 0, 22, 128);
-    g.fillRect(0, p, 128, 22);
+  g.fillStyle = col + "cc";
+  for (let i = 0; i < 128; i += 16) {
+    g.fillRect(i, 0, 5, 128); // woven bands, thinner and more of them than before
+    g.fillRect(0, i, 128, 5);
   }
-  g.fillStyle = col + "88";
-  for (let i = 0; i < 128; i += 8) {
+  g.fillStyle = col + "66";
+  for (let i = 8; i < 128; i += 16) {
     g.fillRect(i, 0, 1, 128);
     g.fillRect(0, i, 128, 1);
   }
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(2, 2);
+  t.repeat.set(3, 3);
   t.colorSpace = THREE.SRGBColorSpace;
   checkTexCache.set(hex, t);
   return t;
@@ -245,8 +245,8 @@ export function buildPerson(spec) {
   const T = makePart(body);
   let prof;
   if (s.pants) prof = [[0.17, 0.86], [0.162, 1.0], [0.158, 1.1], [0.17, 1.3], [0.158, 1.4], [0.13, 1.46], [0.06, 1.515], [0.055, 1.55]];
-  else if (woman) prof = [[0.27, 0.1], [0.245, 0.35], [0.2, 0.75], [0.165, 1.05], [0.158, 1.12], [0.165, 1.3], [0.15, 1.4], [0.125, 1.46], [0.06, 1.515], [0.055, 1.55]];
-  else prof = [[0.215, 0.1], [0.2, 0.3], [0.185, 0.6], [0.168, 0.95], [0.16, 1.1], [0.17, 1.3], [0.158, 1.4], [0.13, 1.46], [0.06, 1.515], [0.055, 1.55]];
+  else if (woman) prof = [[0.27, 0.1], [0.245, 0.35], [0.2, 0.75], [0.16, 1.05], [0.152, 1.12], [0.172, 1.3], [0.15, 1.4], [0.125, 1.46], [0.06, 1.515], [0.055, 1.55]];
+  else prof = [[0.215, 0.1], [0.2, 0.3], [0.185, 0.6], [0.166, 0.95], [0.156, 1.1], [0.178, 1.3], [0.16, 1.4], [0.13, 1.46], [0.06, 1.515], [0.055, 1.55]];
   const tx = woman ? 1.08 : 1.22;
   const tz = woman ? 0.85 : 0.8;
   const ss = (a, b, x) => { const u = Math.min(1, Math.max(0, (x - a) / (b - a))); return u * u * (3 - 2 * u); };
@@ -264,7 +264,12 @@ export function buildPerson(spec) {
   } else {
     T.add(new THREE.TorusGeometry(0.165, 0.013, 6, 24), std(0x241c16, 0.6), [0, 0.99, 0], [Math.PI / 2, 0, 0], [1.2, 0.82, 1]); // belt
   }
-  for (const side of [-1, 1]) T.add(sphere(), outfit, [side * SH, 1.425, 0], [0, 0, 0], [0.058, 0.056, 0.058]); // shoulder caps
+  for (const side of [-1, 1]) {
+    // a sloping shoulder from the base of the neck out to the arm, instead of a ball stuck on top
+    const x0 = 0.05, y0 = 1.505, x1 = SH, y1 = 1.435;
+    const dx = side * (x1 - x0), dy = y1 - y0;
+    T.add(new THREE.CapsuleGeometry(0.05, Math.hypot(dx, dy), 4, 14), outfit, [(side * (x0 + x1)) / 2, (y0 + y1) / 2, 0], [0, 0, Math.atan2(-dx, dy)], [1, 1, 0.86]);
+  }
   T.add(new THREE.CylinderGeometry(0.058, 0.062, 0.04, 18, 1, true), trim, [0, 1.52, 0]); // collar
   T.add(new THREE.CylinderGeometry(0.047, 0.054, 0.16, 14), skin, [0, 1.56, 0], [0, 0, 0], [1, 1, 1], (x, y) => 1 - 0.4 * ss(1.54, 1.63, y)); // neck, shaded under the jaw
   if (s.vest) {
@@ -273,6 +278,7 @@ export function buildPerson(spec) {
     const gap = 0.14;
     const vp = [[0.182, 1.0], [0.176, 1.1], [0.186, 1.3], [0.17, 1.4], [0.14, 1.45]];
     T.add(lathe(vp, 28, gap, Math.PI * 2 - 2 * gap), vestMat, [0, 0, 0], [0, 0, 0], [1.22, 1, 0.8]);
+    for (const a of [Math.PI - 0.62, Math.PI + 0.5]) T.add(lathe(vp.map(([r, y]) => [r + 0.005, y]), 4, a, 0.12), strip, [0, 0, 0], [0, 0, 0], [1.22, 1, 0.8]); // straps down the back
     for (const y of [1.1, 1.26]) {
       const r = y < 1.2 ? 0.178 : 0.188;
       T.add(lathe([[r, y - 0.016], [r + 0.004, y - 0.016], [r + 0.004, y + 0.016], [r, y + 0.016]], 28, gap, Math.PI * 2 - 2 * gap), strip, [0, 0, 0], [0, 0, 0], [1.22, 1, 0.8]);
@@ -374,12 +380,12 @@ export function buildPerson(spec) {
     const hij = cloth(s.headColor, { roughness: 0.85 });
     H.add(shell(Math.PI * 0.3), hij, [0, 0, -0.008], [0, 0, 0], sc(1.215));
     H.add(shell(Math.PI * 0.8, Math.PI * 0.24), hij, [0, 0, -0.008], [0, 0, 0], sc(1.2));
-    H.add(lathe([[0.075, -0.09], [0.12, -0.16], [0.19, -0.25], [0.235, -0.36], [0.25, -0.5]]), hij, [0, 0, -0.005], [0, 0, 0], [1.1, 1, 0.9]); // cloth over the shoulders and chest
+    H.add(lathe([[0.075, -0.09], [0.115, -0.16], [0.17, -0.25], [0.215, -0.35], [0.232, -0.46], [0.222, -0.52], [0.195, -0.55]]), hij, [0, 0, -0.005], [0, 0, 0], [1.04, 1, 0.9]); // cloth over the shoulders and chest
     H.add(new THREE.TorusGeometry(0.1, 0.0065, 6, 28), cloth(s.headTrim ?? s.headColor), [0, 0.002, 0.058], [0, 0, 0], [0.85, 1.07, 1]); // edge round the face
   } else if (s.head === "ghutra") {
     const g = s.headPattern === "check" ? cloth(0xffffff, { map: checkTex(s.headColor), roughness: 0.85 }) : cloth(s.headColor, { roughness: 0.85 });
     H.add(shell(Math.PI * 0.34), g, [0, 0.005, -0.004], [0, 0, 0], sc(1.13));
-    H.add(new THREE.CylinderGeometry(0.108, 0.205, 0.3, 28, 1, true, Math.PI * 0.3, Math.PI * 1.4), g, [0, -0.15, -0.012], [0.05, 0, 0], [1, 1, 0.82]); // cloth behind the head and over the shoulders
+    H.add(new THREE.CylinderGeometry(0.108, 0.19, 0.34, 28, 1, true, Math.PI * 0.3, Math.PI * 1.4), g, [0, -0.17, -0.012], [0.05, 0, 0], [1, 1, 0.82]); // cloth behind the head and over the shoulders
     for (const side of [-1, 1]) {
       H.add(new THREE.BoxGeometry(0.06, 0.22, 0.018), g, [side * 0.135, -0.19, 0.025], [0, 0, side * 0.08]); // loose end hanging at the front
     }
@@ -493,6 +499,6 @@ export const NPC_LOOKS = {
   noura: { skin: SKIN.girlB, outfit: 0x8a5cff, trim: 0xffd23f, head: "hijab", headColor: 0xd8c8ff, headTrim: 0x8a5cff, shoes: 0xffd23f, skirt: true },
   layla: { skin: SKIN.girlC, outfit: 0x1f9e8f, trim: 0xffffff, head: "hijab", headColor: 0x55e07a, headTrim: 0x1f9e8f, shoes: 0xffffff, skirt: true, glasses: true },
   faisal: { skin: SKIN.saudi, outfit: 0xb9d8f2, trim: 0x8fb8dc, head: "ghutra", headColor: 0xffffff, beard: 0x2a1c14, shoes: 0x3a2a1a },
-  omar: { skin: SKIN.black, outfit: 0xf4ead2, trim: 0xd9c9a0, head: "cap", headColor: 0xffffff, beard: 0x120d0a, shoes: 0x2b2b2b },
-  james: { skin: SKIN.white, outfit: 0xe9e9ee, trim: 0xc7c9d1, pants: 0x39445a, head: "bare", headColor: 0xc58b3d, beard: 0xa8742c, shoes: 0x2b2b2b, glasses: true },
+  omar: { skin: SKIN.black, outfit: 0xf4ead2, trim: 0xd9c9a0, head: "ghutra", headColor: 0xffffff, beard: 0x120d0a, shoes: 0x2b2b2b },
+  james: { skin: SKIN.white, outfit: 0xd9d4c7, trim: 0xb8b2a2, head: "ghutra", headColor: 0xffffff, beard: 0xa8742c, shoes: 0x2b2b2b, glasses: true },
 };
