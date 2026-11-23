@@ -7,7 +7,7 @@ export const TIERS = {
   low: { pixelRatio: 1, shadow: 512, shadows: false, seaEvery: 6, trees: 0.5, shrubs: false, treeShadows: false },
 };
 const ORDER = ["high", "medium", "low"];
-export const SLOW_MS = 33; // below about 30 fps: step down
+export const SLOW_MS = 24; // below about 40 fps: step down
 export const FAST_MS = 18; // about 55 fps or better: try a step up
 
 export function startingTier(coarse) {
@@ -23,7 +23,7 @@ export function createQuality({ start, apply }) {
   let total = 0;
   let lastUpAt = -Infinity;
   let bestIndex = 0; // the best tier automatic mode may use (0 is high)
-  let skip = 30; // ignore frames right after a change
+  let skip = 20; // ignore frames right after a change
 
   const set = (name) => {
     tier = name;
@@ -31,7 +31,7 @@ export function createQuality({ start, apply }) {
     frames = 0;
     sum = 0;
     sinceChange = 0;
-    skip = 30;
+    skip = 20;
   };
   apply(tier);
 
@@ -64,12 +64,14 @@ export function createQuality({ start, apply }) {
       }
       frames++;
       sum += ms;
-      if (frames < 120) return;
-      const avg = sum / frames;
+      // A slow window is judged after 45 frames so a weak machine drops a tier quickly; a fast one waits for 120.
+      const avgNow = sum / frames;
+      if (frames < 45 || (frames < 120 && avgNow <= SLOW_MS)) return;
+      const avg = avgNow;
       frames = 0;
       sum = 0;
       const i = ORDER.indexOf(tier);
-      if (avg > SLOW_MS && i < ORDER.length - 1 && sinceChange > 4000) {
+      if (avg > SLOW_MS && i < ORDER.length - 1 && sinceChange > 1500) {
         if (total - lastUpAt < 20000) bestIndex = i + 1; // the step up did not hold
         set(ORDER[i + 1]);
       } else if (avg < FAST_MS && i > bestIndex && sinceChange > 15000) {
