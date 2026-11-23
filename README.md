@@ -2,7 +2,7 @@
 
 [**Play it in your browser**](https://hasanbgit.github.io/quantum-water-game-arcade/) · MIT licence · English and Arabic
 
-![Quantum Water: the plant, the bill panel and the helpers](docs/screenshot.jpg)
+![Quantum Water demo: pick 3 time slots, find the cheaper plan, then watch the simulated quantum search](docs/demo.gif)
 
 A free 3D browser game that teaches **quantum computing** and **Grover's search algorithm** through one question: when should a desalination plant run its pumps to pay the least for electricity?
 You run the plant for a day (exactly 3 of 5 time slots, lowest bill), talk to the helpers, press Simulate to watch a search look for a cheaper plan, then see the result.
