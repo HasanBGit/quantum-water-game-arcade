@@ -147,6 +147,7 @@ const KEYS = {
   Digit1: { key: "1", code: "Digit1", vk: 49 },
   Space: { key: " ", code: "Space", vk: 32, text: " " },
   Tab: { key: "Tab", code: "Tab", vk: 9 },
+  Enter: { key: "Enter", code: "Enter", vk: 13, text: "\r" },
 };
 
 // ---- Accessibility and language checks, each in its own browser (so media settings and size are clean).
