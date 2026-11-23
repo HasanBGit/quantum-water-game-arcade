@@ -383,7 +383,8 @@ body[data-mode="overview"] #btn-use { display: none; }
 body[data-mode="overview"] #btn-pov, body[data-phase]:not([data-phase="play"]) #btn-pov { display: none; }
 
 /* ---- Settings: one button; the view, sound, quality and language controls open in a panel under it */
-.controls { flex-direction: column; align-items: flex-end; gap: 0; padding: 6px; }
+/* Settings and Words sit side by side in one row, so the box stays one button tall and never covers the bill under it. */
+.controls { flex-direction: row; align-items: center; gap: 8px; padding: 6px; }
 /* The panel is a drawer docked to the right edge, under the Settings button. */
 #settings-panel {
   position: fixed;
