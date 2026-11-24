@@ -4,7 +4,7 @@
 
 ## Pages
 - [Play the game](https://quantumwater.hsnb.site/): run a desalination plant and pick the cheapest pump times
-- [Team](https://quantumwater.hsnb.site/team.html): the Quantum Water team
+- [Team](https://quantumwater.hsnb.site/team): the Quantum Water team
 - [Maths check](https://quantumwater.hsnb.site/maths.html): the cost table for all 32 plans
 
 ## Creator
