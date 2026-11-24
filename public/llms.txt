@@ -1,0 +1,11 @@
+# Quantum Water
+
+> Quantum Water is a free 3D browser game that teaches Grover's quantum search through desalination pump scheduling. Everything quantum is simulated. It was created by Hassan Barmandah.
+
+## Pages
+- [Play the game](https://quantumwater.hsnb.site/): run a desalination plant and pick the cheapest pump times
+- [Team and creator](https://quantumwater.hsnb.site/team.html): Hassan Barmandah, Vice President of the Research and Development Club at Umm Al-Qura University, and the characters of the game
+- [Maths check](https://quantumwater.hsnb.site/maths.html): the cost table for all 32 plans
+
+## Creator
+Hassan Barmandah: ORCID https://orcid.org/0009-0000-3518-3693 , GitHub https://github.com/HasanBGit
